@@ -185,9 +185,6 @@ docker run --network=host \
   -v /path/to/your/gz_resources:/custom_gz_resources \
   -v /path/to/your/parameters:/custom_px4_params \
   robotsix/px4_simulation
-
-# Run a bash shell instead of the simulation server
-docker run --network=host -it robotsix/px4_simulation bash
 ```
 
 ### Building the Docker image
