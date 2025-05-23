@@ -13,8 +13,18 @@ fi
 
 # Start the simulation server with provided arguments
 if [ "$1" = "sim" ]; then
-  echo "Starting simulation server in headless mode..."
-  exec ros2 launch robotsix_px4_simulation simulation_server.launch.py headless_mode:=true px4_params_folder:=/custom_px4_params hide_simulation_process_output:=true
+  # Set default values if environment variables are not provided
+  HEADLESS_MODE=${HEADLESS_MODE:-true}
+  HIDE_OUTPUT=${HIDE_OUTPUT:-true}
+  
+  echo "Starting simulation server..."
+  echo "- Headless mode: ${HEADLESS_MODE}"
+  echo "- Hide process output: ${HIDE_OUTPUT}"
+  
+  exec ros2 launch robotsix_px4_simulation simulation_server.launch.py \
+    headless_mode:=${HEADLESS_MODE} \
+    px4_params_folder:=/custom_px4_params \
+    hide_simulation_process_output:=${HIDE_OUTPUT}
 else
   # If the first argument is not "sim", pass all arguments to bash
   exec "$@"
