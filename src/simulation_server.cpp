@@ -168,9 +168,8 @@ void SimulationServer::execute_start(
       if (!spawn_model(model_info.model_name, model_info.model_dir,
                        model_info.x, model_info.y, model_info.z)) {
         result->message = "Failed to spawn model: " + model_info.model_name;
-        goal_handle->abort(result);
-        // Cleanup all launched processes
         shutdown_simulation();
+        goal_handle->abort(result);
         action_in_progress_.store(false);
         return;
       }
@@ -182,7 +181,7 @@ void SimulationServer::execute_start(
     std::string px4_path = pkg_px4_sim + "/px4_sitl_default/bin/px4";
 
     // 5. Launch PX4 for each model
-    int instance_id = 0;  // Start with instance ID 0
+    int instance_id = 0; // Start with instance ID 0
     for (const auto &model_info : goal->models) {
       // Set environment variables for PX4
       setenv("PX4_SYS_AUTOSTART",
@@ -198,20 +197,19 @@ void SimulationServer::execute_start(
           "-w",
           pkg_px4_sim + "/px4_sitl_default",
           "-i",
-          std::to_string(instance_id)};  // Use integer instance ID
+          std::to_string(instance_id)}; // Use integer instance ID
       pid_t px4_pid = launch_process(px4_path, px4_args,
                                      "PX4 for " + model_info.model_name);
       if (px4_pid < 0) {
         result->message =
             "Failed to launch PX4 process for model: " + model_info.model_name;
-        goal_handle->abort(result);
-        // Cleanup all launched processes
         shutdown_simulation();
+        goal_handle->abort(result);
         action_in_progress_.store(false);
         return;
       }
       px4_pids_.push_back(px4_pid);
-      instance_id++;  // Increment instance ID for the next drone
+      instance_id++; // Increment instance ID for the next drone
     }
 
     // 6. Launch MicroXRCEAgent from the package's share directory
@@ -221,9 +219,8 @@ void SimulationServer::execute_start(
         launch_process(xrce_agent_path, agent_args, "MicroXRCEAgent");
     if (xrce_agent_pid_ < 0) {
       result->message = "Failed to launch MicroXRCEAgent process";
-      goal_handle->abort(result);
-      // Cleanup all launched processes
       shutdown_simulation();
+      goal_handle->abort(result);
       action_in_progress_.store(false);
       return;
     }
@@ -239,9 +236,8 @@ void SimulationServer::execute_start(
                 "Waiting for PX4 to ROS2 connection for all drones...");
     if (!wait_for_drone_topics(model_names)) {
       result->message = "Failed to detect ROS2 topics for all drones";
-      goal_handle->abort(result);
-      // Cleanup all launched processes
       shutdown_simulation();
+      goal_handle->abort(result);
       action_in_progress_.store(false);
       return;
     }
