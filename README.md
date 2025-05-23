@@ -197,12 +197,6 @@ docker run --network=host \
   -e HEADLESS_MODE=false \
   -e HIDE_OUTPUT=false \
   robotsix/px4_simulation
-
-# Run headless but show subprocess output
-docker run --network=host \
-  -e HEADLESS_MODE=true \
-  -e HIDE_OUTPUT=false \
-  robotsix/px4_simulation
 ```
 
 Available environment variables:
