@@ -208,3 +208,5 @@ docker build -t robotsix/px4_simulation .
 - Fix compatibility issues for v1.14.x
   - Fix compatibility issues with Ubuntu 24.04
   - Fix compatibility issues with Gazebo Harmonic
+- Docker option to verbose the subprocess output
+- Check of existing PX4 parameter numbers to avoid conflicts
