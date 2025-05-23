@@ -194,7 +194,6 @@ You can configure simulation options through environment variables:
 ```bash
 # Run with GUI (not headless) and show subprocess output
 docker run --network=host \
-  -e HEADLESS_MODE=false \
   -e HIDE_OUTPUT=false \
   robotsix/px4_simulation
 ```
@@ -202,6 +201,8 @@ docker run --network=host \
 Available environment variables:
 - `HEADLESS_MODE`: Set to `false` to run with Gazebo GUI (default: `true`)
 - `HIDE_OUTPUT`: Set to `false` to show simulation process output (default: `true`)
+
+Note that for the GUI to work, need to also pass appropriate X11 permissions to the Docker container.
 
 ### Building the Docker image
 
