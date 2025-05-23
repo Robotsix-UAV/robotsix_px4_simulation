@@ -1,0 +1,381 @@
+<?xml version="1.0"?>
+
+<!-- SPDX-License-Identifier: Apache-2.0 -->
+<!--
+ * Author: Damien SIX (damien@robotsix.net)
+ * Copyright: Robotsix
+ * Date: 2025
+-->
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+
+  <!-- Macro for a basic quadrotor -->
+  <xacro:macro name="quadrotor_base" params="name
+                                        mass='1.0'
+                                        ixx='0.03' ixy='0' ixz='0'
+                                        iyy='0.03' iyz='0'
+                                        izz='0.03'
+                                        arm_length='1.0'
+                                        arm_width='0.025'
+                                        arm_thickness='0.01'
+                                        base_radius='0.05'
+                                        base_height='0.01'
+                                        gyro_noise_density='0.00018665'
+                                        gyro_random_walk='3.8785e-05'
+                                        gyro_bias_correlation_time='1000'
+                                        accel_noise_density='0.00186'
+                                        accel_random_walk='0.006'
+	  				accel_bias_correlation_time='300' 
+                                        max_motor_thrust='30.0'
+	  			        **additional_sensors
+	  				**model_plugin">
+    <model name='${name}'>
+      <pose>0 0 0 0 0 0</pose>
+      <self_collide>false</self_collide>
+      <static>false</static>
+      <link name="base_link">
+        <inertial>
+          <mass>${mass}</mass>
+          <inertia>
+            <ixx>${ixx}</ixx>
+            <ixy>${ixy}</ixy>
+            <ixz>${ixz}</ixz>
+            <iyy>${iyy}</iyy>
+            <iyz>${iyz}</iyz>
+            <izz>${izz}</izz>
+          </inertia>
+        </inertial>
+        <gravity>true</gravity>
+        <visual name='base_link_visual'>
+          <pose>0 0 0 0 0 0</pose>
+          <geometry>
+            <cylinder>
+              <radius>${base_radius}</radius>
+              <length>${base_height}</length>
+            </cylinder>
+          </geometry>
+          <material>
+              <ambient>0 1 0 1</ambient>
+              <diffuse>0 1 0 1</diffuse>
+              <specular>0 1 0 1</specular>
+          </material>
+        </visual>
+        <collision name='base_link_collision'>
+          <pose>0 0 0 0 0 0</pose>
+          <geometry>
+            <cylinder>
+              <radius>${base_radius}</radius>
+              <length>${base_height}</length>
+            </cylinder>
+          </geometry>
+          <surface>
+            <contact>
+              <ode>
+                <min_depth>0.001</min_depth>
+                <max_vel>0</max_vel>
+              </ode>
+            </contact>
+            <friction>
+              <ode />
+            </friction>
+          </surface>
+        </collision>
+        <sensor name="imu_sensor" type="imu">
+          <always_on>1</always_on>
+          <update_rate>250</update_rate>
+          <imu>
+            <xacro:imu_noise_params 
+              gyro_noise_density="${gyro_noise_density}"
+              gyro_random_walk="${gyro_random_walk}"
+              gyro_bias_correlation_time="${gyro_bias_correlation_time}"
+              accel_noise_density="${accel_noise_density}"
+              accel_random_walk="${accel_random_walk}"
+              accel_bias_correlation_time="${accel_bias_correlation_time}"/>
+          </imu>
+        </sensor>
+        <sensor name="air_pressure_sensor" type="air_pressure">
+          <always_on>1</always_on>
+          <update_rate>50</update_rate>
+          <air_pressure>
+            <pressure>
+              <noise type="gaussian">
+                <mean>0</mean>
+                <stddev>0.01</stddev>
+              </noise>
+            </pressure>
+          </air_pressure>
+        </sensor>
+        
+        <xacro:insert_block name="additional_sensors" />
+      </link>
+
+      <xacro:insert_block name="model_plugin" />
+      
+      <!-- Arms -->
+      <link name="arm_0">
+        <gravity>true</gravity>
+        <self_collide>false</self_collide>
+        <pose>0 0 0 0 0 0.7853981633974483</pose>
+        <inertial>
+          <mass>1e-9</mass>
+          <inertia>
+            <ixx>1e-9</ixx>
+            <iyy>1e-9</iyy>
+            <izz>1e-9</izz>
+          </inertia>
+        </inertial>
+        <visual name='arm_0_visual'>
+          <pose>0 0 0 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>${arm_length} ${arm_width} ${arm_thickness}</size>
+            </box>
+          </geometry>
+          <material>
+              <ambient>0 1 0 1</ambient>
+              <diffuse>0 1 0 1</diffuse>
+              <specular>0 1 0 1</specular>
+          </material>
+        </visual>
+        <collision name='arm_0_collision'>
+          <pose>0 0 0 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>${arm_length} ${arm_width} ${arm_thickness}</size>
+            </box>
+          </geometry>
+          <surface>
+            <contact>
+              <ode>
+                <min_depth>0.001</min_depth>
+                <max_vel>0</max_vel>
+              </ode>
+            </contact>
+            <friction>
+              <ode />
+            </friction>
+          </surface>
+        </collision>
+      </link>
+      <joint name='arm_0_joint' type='fixed'>
+        <child>arm_0</child>
+        <parent>base_link</parent>
+      </joint>
+      
+      <link name="arm_1">
+        <gravity>true</gravity>
+        <self_collide>false</self_collide>
+        <pose>0 0 0 0 0 2.356194490192345</pose>
+        <inertial>
+          <mass>1e-9</mass>
+          <inertia>
+            <ixx>1e-9</ixx>
+            <iyy>1e-9</iyy>
+            <izz>1e-9</izz>
+          </inertia>
+        </inertial>
+        <visual name='arm_1_visual'>
+          <pose>0 0 0 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>${arm_length} ${arm_width} ${arm_thickness}</size>
+            </box>
+          </geometry>
+          <material>
+              <ambient>0 1 0 1</ambient>
+              <diffuse>0 1 0 1</diffuse>
+              <specular>0 1 0 1</specular>
+          </material>
+        </visual>
+        <collision name='arm_1_collision'>
+          <pose>0 0 0 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>${arm_length} ${arm_width} ${arm_thickness}</size>
+            </box>
+          </geometry>
+          <surface>
+            <contact>
+              <ode>
+                <min_depth>0.001</min_depth>
+                <max_vel>0</max_vel>
+              </ode>
+            </contact>
+            <friction>
+              <ode />
+            </friction>
+          </surface>
+        </collision>
+      </link>
+      <joint name='arm_1_joint' type='fixed'>
+        <child>arm_1</child>
+        <parent>base_link</parent>
+      </joint>
+      
+      <!-- Rotors -->
+      <xacro:rotor_macro rotor_id="0" 
+                         pos_x="0.3535533905932738" 
+                         pos_y="0.35355339059327373" 
+                         direction="cw" 
+                         max_motor_thrust="${max_motor_thrust}"/>
+                         
+      <xacro:rotor_macro rotor_id="1" 
+                         pos_x="-0.35355339059327373" 
+                         pos_y="0.3535533905932738" 
+                         direction="ccw" 
+                         max_motor_thrust="${max_motor_thrust}"/>
+                         
+      <xacro:rotor_macro rotor_id="2" 
+                         pos_x="-0.35355339059327384" 
+                         pos_y="-0.35355339059327373" 
+                         direction="cw" 
+                         max_motor_thrust="${max_motor_thrust}"/>
+                         
+      <xacro:rotor_macro rotor_id="3" 
+                         pos_x="0.3535533905932737" 
+                         pos_y="-0.35355339059327384" 
+                         direction="ccw" 
+                         max_motor_thrust="${max_motor_thrust}"/>
+    </model>
+  </xacro:macro>
+
+  <!-- Macro for a single axis IMU noise -->
+  <xacro:macro name="imu_axis_noise" params="stddev dynamic_bias_stddev dynamic_bias_correlation_time">
+    <noise type="gaussian">
+      <mean>0</mean>
+      <stddev>${stddev}</stddev>
+      <dynamic_bias_stddev>${dynamic_bias_stddev}</dynamic_bias_stddev>
+      <dynamic_bias_correlation_time>${dynamic_bias_correlation_time}</dynamic_bias_correlation_time>
+    </noise>
+  </xacro:macro>
+
+  <!-- Macro for IMU sensor noise parameters -->
+  <xacro:macro name="imu_noise_params" params="gyro_noise_density='0.00018665' 
+                                              gyro_random_walk='3.8785e-05'
+                                              gyro_bias_correlation_time='1000'
+                                              accel_noise_density='0.00186'
+                                              accel_random_walk='0.006'
+	  				      accel_bias_correlation_time='300'">
+    <angular_velocity>
+      <x>
+        <xacro:imu_axis_noise stddev="${gyro_noise_density}" 
+                             dynamic_bias_stddev="${gyro_random_walk}" 
+                             dynamic_bias_correlation_time="${gyro_bias_correlation_time}"/>
+      </x>
+      <y>
+        <xacro:imu_axis_noise stddev="${gyro_noise_density}" 
+                             dynamic_bias_stddev="${gyro_random_walk}" 
+                             dynamic_bias_correlation_time="${gyro_bias_correlation_time}"/>
+      </y>
+      <z>
+        <xacro:imu_axis_noise stddev="${gyro_noise_density}" 
+                             dynamic_bias_stddev="${gyro_random_walk}" 
+                             dynamic_bias_correlation_time="${gyro_bias_correlation_time}"/>
+      </z>
+    </angular_velocity>
+    <linear_acceleration>
+      <x>
+        <xacro:imu_axis_noise stddev="${accel_noise_density}" 
+                             dynamic_bias_stddev="${accel_random_walk}" 
+                             dynamic_bias_correlation_time="${accel_bias_correlation_time}"/>
+      </x>
+      <y>
+        <xacro:imu_axis_noise stddev="${accel_noise_density}" 
+                             dynamic_bias_stddev="${accel_random_walk}" 
+                             dynamic_bias_correlation_time="${accel_bias_correlation_time}"/>
+      </y>
+      <z>
+        <xacro:imu_axis_noise stddev="${accel_noise_density}" 
+                             dynamic_bias_stddev="${accel_random_walk}" 
+                             dynamic_bias_correlation_time="${accel_bias_correlation_time}"/>
+      </z>
+    </linear_acceleration>
+  </xacro:macro>
+
+  <!-- Macro for a rotor -->
+  <xacro:macro name="rotor_macro" params="rotor_id pos_x pos_y direction max_motor_thrust='30.0'">
+    <link name="rotor_${rotor_id}">
+      <gravity>true</gravity>
+      <self_collide>false</self_collide>
+      <pose>${pos_x} ${pos_y} 0.01 0 0 0</pose>
+      <inertial>
+        <mass>1e-9</mass>
+        <inertia>
+          <ixx>1e-9</ixx>
+          <iyy>1e-9</iyy>
+          <izz>1e-9</izz>
+        </inertia>
+      </inertial>
+      <visual name='rotor_${rotor_id}_visual'>
+        <pose>0 0 0 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://robotsix_px4_simulation/models/propellers/prop_${direction}.dae</uri>
+          </mesh>
+        </geometry>
+        <material>
+            <xacro:if value="${direction == 'cw'}">
+              <ambient>0 0 1 1</ambient>
+              <diffuse>0 0 1 1</diffuse>
+              <specular>0 0 1 1</specular>
+            </xacro:if>
+            <xacro:if value="${direction == 'ccw'}">
+              <ambient>1 0 0 1</ambient>
+              <diffuse>1 0 0 1</diffuse>
+              <specular>1 0 0 1</specular>
+            </xacro:if>
+        </material>
+      </visual>
+      <collision name='rotor_${rotor_id}_collision'>
+        <pose>0 0 0 0 0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.005</length>
+            <radius>0.128</radius>
+          </cylinder>
+        </geometry>
+        <surface>
+          <contact>
+            <ode />
+          </contact>
+          <friction>
+            <ode />
+          </friction>
+        </surface>
+      </collision>
+    </link>
+    <joint name='rotor_${rotor_id}_joint' type='revolute'>
+      <child>rotor_${rotor_id}</child>
+      <parent>base_link</parent>
+      <axis>
+        <xyz>0 0 1</xyz>
+        <limit>
+          <lower>-1e+16</lower>
+          <upper>1e+16</upper>
+        </limit>
+        <dynamics>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <plugin filename="gz-sim-multicopter-motor-model-system"
+            name="gz::sim::systems::MulticopterMotorModel">
+      <jointName>rotor_${rotor_id}_joint</jointName>
+      <linkName>rotor_${rotor_id}</linkName>
+      <turningDirection>${direction}</turningDirection>
+      <timeConstantUp>0.0</timeConstantUp>
+      <timeConstantDown>0.0</timeConstantDown>
+      <maxRotVelocity>1000.0</maxRotVelocity>
+      <motorConstant>${max_motor_thrust * 0.000001}</motorConstant>
+      <momentConstant>0.01</momentConstant>
+      <commandSubTopic>command/motor_speed</commandSubTopic>
+      <motorNumber>${rotor_id}</motorNumber>
+      <rotorDragCoefficient>0.0</rotorDragCoefficient>
+      <rollingMomentCoefficient>0.0</rollingMomentCoefficient>
+      <rotorVelocitySlowdownSim>10</rotorVelocitySlowdownSim>
+      <motorType>velocity</motorType>
+    </plugin>
+  </xacro:macro>
+</robot>

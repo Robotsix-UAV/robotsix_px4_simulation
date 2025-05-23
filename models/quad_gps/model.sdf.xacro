@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<!-- SPDX-License-Identifier: Apache-2.0 -->
+<!--
+ * Author: Damien SIX (damien@robotsix.net)
+ * Copyright: Robotsix
+ * Date: 2025
+-->
+<sdf version="1.9" xmlns:xacro="http://www.ros.org/wiki/xacro">
+  
+  <!-- Import the quadrotor base -->
+  <xacro:include filename="$(find robotsix_px4_simulation)/models/common/quadrotor_base.xacro"/>
+  
+  <!-- Instantiate the quadrotor with GPS -->
+  <xacro:quadrotor_base name="quad_gps">
+      <additional_sensors>
+        <sensor name="navsat_sensor" type="navsat">
+          <always_on>1</always_on>
+          <update_rate>30</update_rate>
+        </sensor>
+</additional_sensors>
+<model_plugin>
+</model_plugin>
+  </xacro:quadrotor_base>
+  
+</sdf>

@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<!-- SPDX-License-Identifier: Apache-2.0 -->
+<!--
+ * Author: Damien SIX (damien@robotsix.net)
+ * Copyright: Robotsix
+ * Date: 2025
+-->
+<sdf version="1.9" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <!-- Import the quadrotor base -->
+  <xacro:include filename="$(find robotsix_px4_simulation)/models/common/quadrotor_base.xacro"/>
+  
+  <!-- Instantiate the quadrotor with MoCap -->
+  <xacro:quadrotor_base name="quad_mocap">
+	  <additional_sensors>
+	  </additional_sensors>
+      <model_plugin>
+ 	   <plugin
+        	name='ignition::gazebo::systems::OdometryPublisher'
+        	filename='ignition-gazebo-odometry-publisher-system'>
+        	<odom_publish_frequency>100</odom_publish_frequency>
+        	<dimensions>3</dimensions>
+    	   </plugin>
+      </model_plugin>
+  </xacro:quadrotor_base>
+
+</sdf>

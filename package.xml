@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+	<name>robotsix_px4_simulation</name>
+  <version>0.1.0</version>
+  <description>ROS2 package for PX4 autopilot</description>
+  <maintainer email="six.damien@robotsix.net">Damien Six</maintainer>
+  <license>Apache-2.0</license>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <depend>robotsix_px4_sim_interface</depend>
+  <depend>xacro</depend>
+  
+  <export>
+	  <build_type>ament_cmake</build_type>
+  </export>
+</package>
