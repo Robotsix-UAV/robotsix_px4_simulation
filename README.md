@@ -218,6 +218,7 @@ docker build -t robotsix/px4_simulation .
   - Automatic generation of PX4 parameters for quadcopters
   - Match parameters with those used by xacro files
 - Simulation speed control
+  - Preliminary tests shows that simulation faster than real-time is not stable with v1.14
   - Add parameters for faster/slower than real-time simulation
   - Ensure stability at different simulation speeds
 - Fix compatibility issues for v1.14.x
