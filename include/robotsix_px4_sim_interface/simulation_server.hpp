@@ -12,11 +12,13 @@
 #pragma once
 
 #include <atomic>
+#include <gz/msgs/clock.pb.h>
 #include <gz/transport/Node.hh>
 #include <rclcpp/rclcpp.hpp>
 #include <rclcpp_action/rclcpp_action.hpp>
 #include <robotsix_px4_sim_interface/action/start_simulation.hpp>
 #include <robotsix_px4_sim_interface/action/stop_simulation.hpp>
+#include <rosgraph_msgs/msg/clock.hpp>
 
 /**
  * @brief Server node for managing Gazebo simulations with PX4 flight
@@ -70,6 +72,12 @@ private:
 
   /** @brief Flag to track if an action is currently being processed */
   std::atomic<bool> action_in_progress_;
+
+  /** @brief Publisher for simulation clock */
+  rclcpp::Publisher<rosgraph_msgs::msg::Clock>::SharedPtr clock_publisher_;
+
+  /** @brief Callback for Gazebo clock messages */
+  void on_clock_message(const gz::msgs::Clock &msg);
 
   /**
    * @brief Handles a new StartSimulation goal request

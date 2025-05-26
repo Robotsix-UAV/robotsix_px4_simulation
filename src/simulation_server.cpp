@@ -48,6 +48,11 @@ SimulationServer::SimulationServer()
               hide_simulation_process_output_ ? "enabled" : "disabled");
   RCLCPP_INFO(this->get_logger(), "Headless mode: %s",
               headless_mode_ ? "enabled" : "disabled");
+
+  // Initialize the clock publisher
+  clock_publisher_ =
+      this->create_publisher<rosgraph_msgs::msg::Clock>("/clock", 10);
+
   start_action_server_ = rclcpp_action::create_server<StartSim>(
       this, "start_simulation",
       std::bind(&SimulationServer::handle_start_goal, this,
@@ -65,6 +70,17 @@ SimulationServer::SimulationServer()
                 std::placeholders::_1),
       std::bind(&SimulationServer::handle_stop_accepted, this,
                 std::placeholders::_1));
+}
+
+// Callback for Gazebo clock messages
+void SimulationServer::on_clock_message(const gz::msgs::Clock &msg) {
+  // Convert Gazebo time to ROS time
+  rosgraph_msgs::msg::Clock ros_clock_msg;
+  ros_clock_msg.clock.sec = msg.sim().sec();
+  ros_clock_msg.clock.nanosec = msg.sim().nsec();
+
+  // Publish to ROS clock topic
+  clock_publisher_->publish(ros_clock_msg);
 }
 
 // StartSimulation handlers
@@ -158,6 +174,24 @@ void SimulationServer::execute_start(
       goal_handle->abort(result);
       action_in_progress_.store(false);
       return;
+    }
+
+    // Subscribe to Gazebo clock topic and publish to ROS clock
+    RCLCPP_INFO(this->get_logger(),
+                "Setting up clock topic forwarding from Gazebo to ROS...");
+    if (!gz_node_->Subscribe("/clock", &SimulationServer::on_clock_message,
+                             this)) {
+      RCLCPP_WARN(this->get_logger(),
+                  "Failed to subscribe to Gazebo clock topic");
+      // Stop simulation if we can't forward the clock
+      shutdown_simulation();
+      result->message = "Failed to subscribe to Gazebo clock topic";
+      goal_handle->abort(result);
+      action_in_progress_.store(false);
+      return;
+    } else {
+      RCLCPP_INFO(this->get_logger(),
+                  "Successfully subscribed to Gazebo clock topic");
     }
 
     // 3. Spawn all models using EntityFactory service
@@ -328,6 +362,12 @@ bool SimulationServer::shutdown_simulation() {
               "Attempting to cleanly shut down simulation...");
 
   bool success = true;
+
+  // Stop publishing the clock if we were doing so
+  if (gz_node_) {
+    gz_node_->Unsubscribe("/clock");
+  }
+  RCLCPP_INFO(this->get_logger(), "Stopped forwarding Gazebo clock to ROS");
 
   // First terminate all PX4 instances, then MicroXRCEAgent, then Gazebo
   for (auto &pid : px4_pids_) {
