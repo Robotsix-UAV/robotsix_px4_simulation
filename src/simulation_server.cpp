@@ -44,10 +44,26 @@ SimulationServer::SimulationServer()
   this->declare_parameter<bool>("headless_mode", false);
   this->get_parameter("headless_mode", headless_mode_);
 
+  this->declare_parameter<std::string>("custom_px4_path", "");
+  this->get_parameter("custom_px4_path", custom_px4_path_);
+
+  this->declare_parameter<std::string>("custom_xrce_agent_path", "");
+  this->get_parameter("custom_xrce_agent_path", custom_xrce_agent_path_);
+
   RCLCPP_INFO(this->get_logger(), "Simulation process output hiding: %s",
               hide_simulation_process_output_ ? "enabled" : "disabled");
   RCLCPP_INFO(this->get_logger(), "Headless mode: %s",
               headless_mode_ ? "enabled" : "disabled");
+  
+  if (!custom_px4_path_.empty()) {
+    RCLCPP_INFO(this->get_logger(), "Using custom PX4 path: %s", 
+                custom_px4_path_.c_str());
+  }
+  
+  if (!custom_xrce_agent_path_.empty()) {
+    RCLCPP_INFO(this->get_logger(), "Using custom MicroXRCE-DDS Agent path: %s", 
+                custom_xrce_agent_path_.c_str());
+  }
 
   // Initialize the clock publisher
   clock_publisher_ =
@@ -212,7 +228,18 @@ void SimulationServer::execute_start(
     // 4. Get path to PX4 executable
     std::string pkg_px4_sim =
         ament_index_cpp::get_package_share_directory("robotsix_px4_simulation");
-    std::string px4_path = pkg_px4_sim + "/px4_sitl_default/bin/px4";
+    std::string px4_path;
+    
+    // Use custom PX4 path if provided, otherwise use the default
+    if (!custom_px4_path_.empty()) {
+      px4_path = custom_px4_path_;
+      RCLCPP_INFO(this->get_logger(), "Using custom PX4 executable: %s", 
+                  px4_path.c_str());
+    } else {
+      px4_path = pkg_px4_sim + "/px4_sitl_default/bin/px4";
+      RCLCPP_INFO(this->get_logger(), "Using default PX4 executable: %s", 
+                  px4_path.c_str());
+    }
 
     // 5. Launch PX4 for each model
     int instance_id = 0; // Start with instance ID 0
@@ -246,8 +273,19 @@ void SimulationServer::execute_start(
       instance_id++; // Increment instance ID for the next drone
     }
 
-    // 6. Launch MicroXRCEAgent from the package's share directory
-    std::string xrce_agent_path = pkg_px4_sim + "/bin/MicroXRCEAgent";
+    // 6. Launch MicroXRCEAgent
+    std::string xrce_agent_path;
+    
+    // Use custom MicroXRCE-DDS Agent path if provided, otherwise use the default
+    if (!custom_xrce_agent_path_.empty()) {
+      xrce_agent_path = custom_xrce_agent_path_;
+      RCLCPP_INFO(this->get_logger(), "Using custom MicroXRCE-DDS Agent: %s", 
+                  xrce_agent_path.c_str());
+    } else {
+      xrce_agent_path = pkg_px4_sim + "/bin/MicroXRCEAgent";
+      RCLCPP_INFO(this->get_logger(), "Using default MicroXRCE-DDS Agent: %s", 
+                  xrce_agent_path.c_str());
+    }
     std::vector<std::string> agent_args = {"udp4", "-p", "8888"};
     xrce_agent_pid_ =
         launch_process(xrce_agent_path, agent_args, "MicroXRCEAgent");

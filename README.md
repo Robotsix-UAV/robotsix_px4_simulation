@@ -126,6 +126,26 @@ by an underscore and descriptive name (e.g., `6661_quad_gps`, `6662_quad_mocap`)
 identifies the airframe type and is required by PX4. These files will be copied to the PX4 airframes
 directory at launch time.
 
+#### Custom PX4 and MicroXRCE-DDS Agent Executables
+
+If you've built PX4 or MicroXRCE-DDS Agent separately (or skipped their installation during the package build),
+you can provide custom paths to their executables:
+
+```bash
+# Launch with custom PX4 executable
+ros2 launch robotsix_px4_simulation simulation_server.launch.py custom_px4_path:=/path/to/your/px4
+
+# Launch with custom MicroXRCE-DDS Agent executable
+ros2 launch robotsix_px4_simulation simulation_server.launch.py custom_xrce_agent_path:=/path/to/your/MicroXRCEAgent
+
+# Launch with both custom executables
+ros2 launch robotsix_px4_simulation simulation_server.launch.py \
+  custom_px4_path:=/path/to/your/px4 \
+  custom_xrce_agent_path:=/path/to/your/MicroXRCEAgent
+```
+
+This is particularly useful when you've built the package with `SKIP_PX4_INSTALL=ON` or `SKIP_MICRODDS_INSTALL=ON`.
+
 ### Using the Simulation Interface
 
 Once the server is running, you can use ros2 action commands to start and stop simulations. 
