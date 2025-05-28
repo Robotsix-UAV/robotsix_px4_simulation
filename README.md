@@ -256,7 +256,6 @@ docker build -t robotsix/px4_simulation .
 - Fix compatibility issues for v1.14.x
   - Fix compatibility issues with Ubuntu 24.04
   - Fix compatibility issues with Gazebo Harmonic (issue opened here: https://github.com/PX4/PX4-Autopilot/issues/24931)
-- Docker option to verbose the subprocess output
 - Check of existing PX4 parameter numbers to avoid conflicts
 - Add the keyword WORLD in the model directory to allow spawning models from the .sdf world file instead of
   the model directory
