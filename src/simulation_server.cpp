@@ -45,43 +45,81 @@ SimulationServer::SimulationServer()
   this->get_parameter("headless_mode", headless_mode_);
 
   this->declare_parameter<std::string>("px4_path", "");
-  this->get_parameter("px4_path", px4_path_);
+  this->get_parameter("px4_path", px4_path_param_);
 
   this->declare_parameter<std::string>("xrce_agent_path", "");
-  this->get_parameter("xrce_agent_path", xrce_agent_path_);
+  this->get_parameter("xrce_agent_path", xrce_agent_path_param_);
 
   RCLCPP_INFO(this->get_logger(), "Simulation process output hiding: %s",
               hide_simulation_process_output_ ? "enabled" : "disabled");
   RCLCPP_INFO(this->get_logger(), "Headless mode: %s",
               headless_mode_ ? "enabled" : "disabled");
   
+  // Get package share directory
+  std::string pkg_px4_sim = 
+      ament_index_cpp::get_package_share_directory("robotsix_px4_simulation");
+  
   // Validate PX4 executable path
-  if (!px4_path_.empty()) {
-    if (std::filesystem::exists(px4_path_) && 
-        (std::filesystem::status(px4_path_).permissions() & 
+  if (!px4_path_param_.empty()) {
+    // Check custom path
+    if (std::filesystem::exists(px4_path_param_) && 
+        (std::filesystem::status(px4_path_param_).permissions() & 
          std::filesystem::perms::owner_exec) != std::filesystem::perms::none) {
-      validated_px4_path_ = px4_path_;
+      px4_path_ = px4_path_param_;
       RCLCPP_INFO(this->get_logger(), "Custom PX4 executable found at: %s", 
-                  validated_px4_path_.c_str());
+                  px4_path_.c_str());
     } else {
       RCLCPP_ERROR(this->get_logger(), 
                   "Custom PX4 executable not found or not executable at: %s", 
+                  px4_path_param_.c_str());
+      throw std::runtime_error("Invalid PX4 executable path");
+    }
+  } else {
+    // Check default path
+    std::string default_px4_path = pkg_px4_sim + "/px4_sitl_default/bin/px4";
+    if (std::filesystem::exists(default_px4_path) && 
+        (std::filesystem::status(default_px4_path).permissions() & 
+         std::filesystem::perms::owner_exec) != std::filesystem::perms::none) {
+      px4_path_ = default_px4_path;
+      RCLCPP_INFO(this->get_logger(), "Using default PX4 executable: %s", 
                   px4_path_.c_str());
+    } else {
+      RCLCPP_ERROR(this->get_logger(), 
+                  "Default PX4 executable not found or not executable at: %s", 
+                  default_px4_path.c_str());
+      throw std::runtime_error("Default PX4 executable not found or not executable");
     }
   }
   
   // Validate MicroXRCE-DDS Agent executable path
-  if (!xrce_agent_path_.empty()) {
-    if (std::filesystem::exists(xrce_agent_path_) && 
-        (std::filesystem::status(xrce_agent_path_).permissions() & 
+  if (!xrce_agent_path_param_.empty()) {
+    // Check custom path
+    if (std::filesystem::exists(xrce_agent_path_param_) && 
+        (std::filesystem::status(xrce_agent_path_param_).permissions() & 
          std::filesystem::perms::owner_exec) != std::filesystem::perms::none) {
-      validated_xrce_agent_path_ = xrce_agent_path_;
+      xrce_agent_path_ = xrce_agent_path_param_;
       RCLCPP_INFO(this->get_logger(), "Custom MicroXRCE-DDS Agent found at: %s", 
-                  validated_xrce_agent_path_.c_str());
+                  xrce_agent_path_.c_str());
     } else {
       RCLCPP_ERROR(this->get_logger(), 
                   "Custom MicroXRCE-DDS Agent not found or not executable at: %s", 
+                  xrce_agent_path_param_.c_str());
+      throw std::runtime_error("Invalid MicroXRCE-DDS Agent executable path");
+    }
+  } else {
+    // Check default path
+    std::string default_xrce_agent_path = pkg_px4_sim + "/bin/MicroXRCEAgent";
+    if (std::filesystem::exists(default_xrce_agent_path) && 
+        (std::filesystem::status(default_xrce_agent_path).permissions() & 
+         std::filesystem::perms::owner_exec) != std::filesystem::perms::none) {
+      xrce_agent_path_ = default_xrce_agent_path;
+      RCLCPP_INFO(this->get_logger(), "Using default MicroXRCE-DDS Agent: %s", 
                   xrce_agent_path_.c_str());
+    } else {
+      RCLCPP_ERROR(this->get_logger(), 
+                  "Default MicroXRCE-DDS Agent not found or not executable at: %s", 
+                  default_xrce_agent_path.c_str());
+      throw std::runtime_error("Default MicroXRCE-DDS Agent not found or not executable");
     }
   }
 
@@ -248,33 +286,9 @@ void SimulationServer::execute_start(
     // 4. Get path to PX4 executable
     std::string pkg_px4_sim =
         ament_index_cpp::get_package_share_directory("robotsix_px4_simulation");
-    std::string px4_path;
     
-    // Use validated custom PX4 path if available, otherwise check the default
-    if (!validated_px4_path_.empty()) {
-      px4_path = validated_px4_path_;
-      RCLCPP_INFO(this->get_logger(), "Using custom PX4 executable: %s", 
-                  px4_path.c_str());
-    } else {
-      // Check if default PX4 executable exists and is executable
-      std::string default_px4_path = pkg_px4_sim + "/px4_sitl_default/bin/px4";
-      
-      if (std::filesystem::exists(default_px4_path) && 
-          (std::filesystem::status(default_px4_path).permissions() & 
-           std::filesystem::perms::owner_exec) != std::filesystem::perms::none) {
-        px4_path = default_px4_path;
-        RCLCPP_INFO(this->get_logger(), "Using default PX4 executable: %s", 
-                    px4_path.c_str());
-      } else {
-        RCLCPP_ERROR(this->get_logger(), 
-                    "Default PX4 executable not found or not executable at: %s", 
-                    default_px4_path.c_str());
-        result->message = "PX4 executable not found or not executable";
-        goal_handle->abort(result);
-        action_in_progress_.store(false);
-        return;
-      }
-    }
+    // PX4 path was already validated during initialization
+    RCLCPP_INFO(this->get_logger(), "Using PX4 executable: %s", px4_path_.c_str());
 
     // 5. Launch PX4 for each model
     int instance_id = 0; // Start with instance ID 0
@@ -294,7 +308,7 @@ void SimulationServer::execute_start(
           pkg_px4_sim + "/px4_sitl_default",
           "-i",
           std::to_string(instance_id)}; // Use integer instance ID
-      pid_t px4_pid = launch_process(px4_path, px4_args,
+      pid_t px4_pid = launch_process(px4_path_, px4_args,
                                      "PX4 for " + model_info.model_name);
       if (px4_pid < 0) {
         result->message =
@@ -311,31 +325,9 @@ void SimulationServer::execute_start(
     // 6. Launch MicroXRCEAgent
     std::string xrce_agent_path;
     
-    // Use validated custom MicroXRCE-DDS Agent path if available, otherwise check the default
-    if (!validated_xrce_agent_path_.empty()) {
-      xrce_agent_path = validated_xrce_agent_path_;
-      RCLCPP_INFO(this->get_logger(), "Using custom MicroXRCE-DDS Agent: %s", 
-                  xrce_agent_path.c_str());
-    } else {
-      // Check if default MicroXRCE-DDS Agent executable exists and is executable
-      std::string default_xrce_agent_path = pkg_px4_sim + "/bin/MicroXRCEAgent";
-      
-      if (std::filesystem::exists(default_xrce_agent_path) && 
-          (std::filesystem::status(default_xrce_agent_path).permissions() & 
-           std::filesystem::perms::owner_exec) != std::filesystem::perms::none) {
-        xrce_agent_path = default_xrce_agent_path;
-        RCLCPP_INFO(this->get_logger(), "Using default MicroXRCE-DDS Agent: %s", 
-                    xrce_agent_path.c_str());
-      } else {
-        RCLCPP_ERROR(this->get_logger(), 
-                    "Default MicroXRCE-DDS Agent not found or not executable at: %s", 
-                    default_xrce_agent_path.c_str());
-        result->message = "MicroXRCE-DDS Agent executable not found or not executable";
-        goal_handle->abort(result);
-        action_in_progress_.store(false);
-        return;
-      }
-    }
+    // MicroXRCE-DDS Agent path was already validated during initialization
+    std::string xrce_agent_path = xrce_agent_path_;
+    RCLCPP_INFO(this->get_logger(), "Using MicroXRCE-DDS Agent: %s", xrce_agent_path.c_str());
     std::vector<std::string> agent_args = {"udp4", "-p", "8888"};
     xrce_agent_pid_ =
         launch_process(xrce_agent_path, agent_args, "MicroXRCEAgent");
