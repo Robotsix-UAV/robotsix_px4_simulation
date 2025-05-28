@@ -54,14 +54,27 @@ colcon build --packages-select robotsix_px4_sim_interface robotsix_px4_simulatio
 
 Since the package automatically clones and builds the PX4-Autopilot repository, it may take a while.
 
-You can select a specific PX4 Autopilot version by setting the `PX4_VERSION` parameter:
+#### Build Options
+
+You can customize the build with the following options:
 
 ```bash
 # Build with PX4 v1.14.3
 colcon build --packages-select robotsix_px4_simulation --cmake-args -DPX4_VERSION=v1.14.3
+
+# Skip PX4 Autopilot installation (if you have your own installation)
+colcon build --packages-select robotsix_px4_simulation --cmake-args -DSKIP_PX4_INSTALL=ON
+
+# Skip MicroXRCE-DDS Agent installation (if you have your own installation)
+colcon build --packages-select robotsix_px4_simulation --cmake-args -DSKIP_MICRODDS_INSTALL=ON
+
+# Skip both PX4 and MicroXRCE-DDS Agent installation
+colcon build --packages-select robotsix_px4_simulation --cmake-args -DSKIP_PX4_INSTALL=ON -DSKIP_MICRODDS_INSTALL=ON
 ```
 
 Currently supported PX4 versions: v1.14.0, v1.14.1, v1.14.2, v1.14.3, v1.14.4
+
+> **Note:** When skipping PX4 installation, you'll need to provide paths to your custom PX4 installation when launching the simulation server. PX4 models and parameter files won't be automatically installed.
 
 ### 4. Source the workspace
 
@@ -213,7 +226,7 @@ docker build -t robotsix/px4_simulation .
 
 ## TODO
 - Add support for PX4 v1.15.x
-- Allow to skip install of Px4/MicroDDS and provide custom path to it for the server.
+- ✅ Allow to skip install of Px4/MicroDDS and provide custom path to it for the server.
 - Parameter generation
   - Automatic generation of PX4 parameters for quadcopters
   - Match parameters with those used by xacro files

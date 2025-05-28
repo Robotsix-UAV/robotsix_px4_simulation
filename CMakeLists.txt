@@ -31,15 +31,21 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)
 endif()
 
-# Define PX4 version options
+# Options to skip PX4 and MicroDDS installation
+option(SKIP_PX4_INSTALL "Skip PX4 Autopilot download and build" OFF)
+option(SKIP_MICRODDS_INSTALL "Skip MicroXRCE-DDS Agent download and build" OFF)
+
+# Define PX4 version options (only used if not skipping PX4 install)
 if(NOT DEFINED PX4_VERSION)
   set(PX4_VERSION "v1.14.4")
 endif()
 
-set(ALLOWED_PX4_VERSIONS "v1.14.0;v1.14.1;v1.14.2;v1.14.3;v1.14.4")
-list(FIND ALLOWED_PX4_VERSIONS "${PX4_VERSION}" VERSION_INDEX)
-if(VERSION_INDEX EQUAL -1)
-  message(FATAL_ERROR "Invalid PX4 version: ${PX4_VERSION}. Allowed versions: ${ALLOWED_PX4_VERSIONS}")
+if(NOT SKIP_PX4_INSTALL)
+  set(ALLOWED_PX4_VERSIONS "v1.14.0;v1.14.1;v1.14.2;v1.14.3;v1.14.4")
+  list(FIND ALLOWED_PX4_VERSIONS "${PX4_VERSION}" VERSION_INDEX)
+  if(VERSION_INDEX EQUAL -1)
+    message(FATAL_ERROR "Invalid PX4 version: ${PX4_VERSION}. Allowed versions: ${ALLOWED_PX4_VERSIONS}")
+  endif()
 endif()
 
 
@@ -108,30 +114,40 @@ add_custom_target(px4_autopilot ALL
   COMMENT "Building PX4 Autopilot ${PX4_VERSION} SITL"
 )
 
-# Copy the full PX4_AUTOPILOT build directory to the install directory
-install(
-  DIRECTORY ${PX4_AUTOPILOT_DIR}/build/px4_sitl_default/
-  DESTINATION share/${PROJECT_NAME}/px4_sitl_default
-  USE_SOURCE_PERMISSIONS
-)
-
-# Install PX4 SITL config files to the installed build directory
-file(GLOB CONFIG_FILES "${CMAKE_CURRENT_SOURCE_DIR}/config/px4_parameters/*")
-foreach(CONFIG_FILE ${CONFIG_FILES})
-  get_filename_component(CONFIG_NAME ${CONFIG_FILE} NAME)
+# Copy the full PX4_AUTOPILOT build directory to the install directory if not skipped
+if(NOT SKIP_PX4_INSTALL)
   install(
-    FILES ${CONFIG_FILE}
-    DESTINATION share/${PROJECT_NAME}/px4_sitl_default/etc/init.d-posix/airframes
-    PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ
+    DIRECTORY ${PX4_AUTOPILOT_DIR}/build/px4_sitl_default/
+    DESTINATION share/${PROJECT_NAME}/px4_sitl_default
+    USE_SOURCE_PERMISSIONS
   )
-endforeach()
 
-# Install MicroXRCE Agent executable
-install(
-  FILES ${CMAKE_BINARY_DIR}/micro_xrce_dds_agent-prefix/src/micro_xrce_dds_agent-build/MicroXRCEAgent
-  DESTINATION share/${PROJECT_NAME}/bin
-  PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
-)
+  # Install PX4 SITL config files to the installed build directory
+  file(GLOB CONFIG_FILES "${CMAKE_CURRENT_SOURCE_DIR}/config/px4_parameters/*")
+  foreach(CONFIG_FILE ${CONFIG_FILES})
+    get_filename_component(CONFIG_NAME ${CONFIG_FILE} NAME)
+    install(
+      FILES ${CONFIG_FILE}
+      DESTINATION share/${PROJECT_NAME}/px4_sitl_default/etc/init.d-posix/airframes
+      PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ
+    )
+  endforeach()
+  
+  # Install PX4 models
+  install(
+    DIRECTORY ${PX4_AUTOPILOT_DIR}/Tools/simulation/gz/models/
+    DESTINATION share/${PROJECT_NAME}/px4_models
+  )
+endif()
+
+# Install MicroXRCE Agent executable if not skipped
+if(NOT SKIP_MICRODDS_INSTALL)
+  install(
+    FILES ${CMAKE_BINARY_DIR}/micro_xrce_dds_agent-prefix/src/micro_xrce_dds_agent-build/MicroXRCEAgent
+    DESTINATION share/${PROJECT_NAME}/bin
+    PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
+  )
+endif()
 
 # Build simulation server
 add_executable(simulation_server src/simulation_server.cpp)
@@ -174,11 +190,6 @@ install(
   DESTINATION share/${PROJECT_NAME}/models
 )
 
-# Install also PX4 models
-install(
-  DIRECTORY ${PX4_AUTOPILOT_DIR}/Tools/simulation/gz/models/
-  DESTINATION share/${PROJECT_NAME}/px4_models
-)
 
 # Install include directory
 install(
