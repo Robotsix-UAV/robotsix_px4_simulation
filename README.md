@@ -129,7 +129,11 @@ directory at launch time.
 #### Custom PX4 and MicroXRCE-DDS Agent Executables
 
 If you've built PX4 or MicroXRCE-DDS Agent separately (or skipped their installation during the package build),
-you can provide custom paths to their executables:
+you can provide custom paths.
+
+- To specify a custom PX4 build directory, use the `px4_dir` argument. It should point to the `px4_sitl_default` 
+  directory or equivalent.
+- To specify a custom MicroXRCE-DDS Agent executable, use the `xrce_agent_path` argument.
 
 ```bash
 # Launch with custom PX4 build directory
