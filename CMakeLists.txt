@@ -50,7 +50,12 @@ endif()
 
 
 # Set PX4 Autopilot directory
-set(PX4_AUTOPILOT_DIR ${CMAKE_BINARY_DIR}/PX4-Autopilot)
+if(NOT SKIP_PX4_INSTALL)
+  set(PX4_AUTOPILOT_DIR ${CMAKE_BINARY_DIR}/PX4-Autopilot)
+else()
+  # When skipping PX4 installation, still define the directory for reference
+  set(PX4_AUTOPILOT_DIR "")
+endif()
 include(ExternalProject)
 
 # Setup PX4-Autopilot
@@ -72,47 +77,52 @@ ExternalProject_Add(px4_download
   EXCLUDE_FROM_ALL      1                 # Don’t hook into the “all” target :contentReference[oaicite:5]{index=5}
 )
 
-# Setup Micro XRCE-DDS Agent as an external project
-ExternalProject_Add(micro_xrce_dds_agent
-  GIT_REPOSITORY https://github.com/eProsima/Micro-XRCE-DDS-Agent.git
-  GIT_TAG v2.4.2 # TODO: might be different for v1.14 or ros jazzy
-  GIT_SHALLOW ON
-  GIT_PROGRESS ON
-  
-  CMAKE_ARGS
-    -DCMAKE_BUILD_TYPE=Release
-    -DUAGENT_BUILD_EXECUTABLE=ON
-    -DUAGENT_USE_SYSTEM_FASTDDS=ON
+# Setup Micro XRCE-DDS Agent as an external project (only if not skipping)
+if(NOT SKIP_MICRODDS_INSTALL)
+  ExternalProject_Add(micro_xrce_dds_agent
+    GIT_REPOSITORY https://github.com/eProsima/Micro-XRCE-DDS-Agent.git
+    GIT_TAG v2.4.2 # TODO: might be different for v1.14 or ros jazzy
+    GIT_SHALLOW ON
+    GIT_PROGRESS ON
+    
+    CMAKE_ARGS
+      -DCMAKE_BUILD_TYPE=Release
+      -DUAGENT_BUILD_EXECUTABLE=ON
+      -DUAGENT_USE_SYSTEM_FASTDDS=ON
 
-  INSTALL_COMMAND ""
-  
-  BUILD_BYPRODUCTS ${CMAKE_BINARY_DIR}/micro_xrce_dds_agent-prefix/src/micro_xrce_dds_agent-build/microxrcedds_agent
-)
+    INSTALL_COMMAND ""
+    
+    BUILD_BYPRODUCTS ${CMAKE_BINARY_DIR}/micro_xrce_dds_agent-prefix/src/micro_xrce_dds_agent-build/microxrcedds_agent
+  )
+endif()
 
-# Create Python virtual environment for PX4 build
-add_custom_target(px4_venv
-  COMMAND python3 -m venv ${PX4_AUTOPILOT_DIR}/px4_venv
-  COMMAND ${PX4_AUTOPILOT_DIR}/px4_venv/bin/pip install -r ${PX4_AUTOPILOT_DIR}/Tools/setup/requirements.txt
-  COMMAND ${PX4_AUTOPILOT_DIR}/px4_venv/bin/pip install empy==3.3.4
-  DEPENDS px4_download
-  COMMENT "Setting up Python virtual environment for PX4 build"
-)
+# Create Python virtual environment and build PX4 (only if not skipping)
+if(NOT SKIP_PX4_INSTALL)
+  # Create Python virtual environment for PX4 build
+  add_custom_target(px4_venv
+    COMMAND python3 -m venv ${PX4_AUTOPILOT_DIR}/px4_venv
+    COMMAND ${PX4_AUTOPILOT_DIR}/px4_venv/bin/pip install -r ${PX4_AUTOPILOT_DIR}/Tools/setup/requirements.txt
+    COMMAND ${PX4_AUTOPILOT_DIR}/px4_venv/bin/pip install empy==3.3.4
+    DEPENDS px4_download
+    COMMENT "Setting up Python virtual environment for PX4 build"
+  )
 
-# Copy DDS configuration file
-add_custom_target(px4_dds_config
-  COMMAND ${CMAKE_COMMAND} -E copy 
-    ${CMAKE_CURRENT_SOURCE_DIR}/config/dds_topics/default.yaml
-    ${PX4_AUTOPILOT_DIR}/src/modules/uxrce_dds_client/dds_topics.yaml
-  DEPENDS px4_venv
-  COMMENT "Copying DDS configuration file"
-)
+  # Copy DDS configuration file
+  add_custom_target(px4_dds_config
+    COMMAND ${CMAKE_COMMAND} -E copy 
+      ${CMAKE_CURRENT_SOURCE_DIR}/config/dds_topics/default.yaml
+      ${PX4_AUTOPILOT_DIR}/src/modules/uxrce_dds_client/dds_topics.yaml
+    DEPENDS px4_venv
+    COMMENT "Copying DDS configuration file"
+  )
 
-# Build PX4 SITL
-add_custom_target(px4_autopilot ALL
-  COMMAND cd ${PX4_AUTOPILOT_DIR} && . ./px4_venv/bin/activate && make px4_sitl_default
-  DEPENDS px4_dds_config
-  COMMENT "Building PX4 Autopilot ${PX4_VERSION} SITL"
-)
+  # Build PX4 SITL
+  add_custom_target(px4_autopilot ALL
+    COMMAND cd ${PX4_AUTOPILOT_DIR} && . ./px4_venv/bin/activate && make px4_sitl_default
+    DEPENDS px4_dds_config
+    COMMENT "Building PX4 Autopilot ${PX4_VERSION} SITL"
+  )
+endif()
 
 # Copy the full PX4_AUTOPILOT build directory to the install directory if not skipped
 if(NOT SKIP_PX4_INSTALL)
