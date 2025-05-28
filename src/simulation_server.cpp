@@ -60,87 +60,57 @@ SimulationServer::SimulationServer()
       ament_index_cpp::get_package_share_directory("robotsix_px4_simulation");
   
   // Validate PX4 build directory
-  if (!px4_dir_param_.empty()) {
-    // Check custom path
-    std::string px4_exec_path = px4_dir_param_ + "/bin/px4";
-    std::string px4_etc_path = px4_dir_param_ + "/etc";
-    std::string px4_rcS_path = px4_dir_param_ + "/etc/init.d-posix/rcS";
-    
-    if (std::filesystem::exists(px4_exec_path) && 
-        (std::filesystem::status(px4_exec_path).permissions() & 
-         std::filesystem::perms::owner_exec) != std::filesystem::perms::none &&
-        std::filesystem::exists(px4_etc_path) &&
-        std::filesystem::exists(px4_rcS_path)) {
-      px4_dir_ = px4_dir_param_;
-      RCLCPP_INFO(this->get_logger(), "Custom PX4 build directory found at: %s", 
-                  px4_dir_.c_str());
-      RCLCPP_INFO(this->get_logger(), "PX4 executable found at: %s", 
-                  px4_exec_path.c_str());
-    } else {
-      RCLCPP_ERROR(this->get_logger(), 
-                  "Invalid PX4 build directory at: %s", 
-                  px4_dir_param_.c_str());
-      RCLCPP_ERROR(this->get_logger(), 
-                  "PX4 build directory must contain bin/px4 executable and etc/init.d-posix/rcS script");
-      throw std::runtime_error("Invalid PX4 build directory");
-    }
+  std::string px4_dir_to_check = px4_dir_param_;
+  if (px4_dir_to_check.empty()) {
+    px4_dir_to_check = pkg_px4_sim + "/px4_sitl_default";
+  }
+  
+  // Check PX4 directory
+  std::string px4_exec_path = px4_dir_to_check + "/bin/px4";
+  std::string px4_etc_path = px4_dir_to_check + "/etc";
+  std::string px4_rcS_path = px4_dir_to_check + "/etc/init.d-posix/rcS";
+  
+  if (std::filesystem::exists(px4_exec_path) && 
+      (std::filesystem::status(px4_exec_path).permissions() & 
+       std::filesystem::perms::owner_exec) != std::filesystem::perms::none &&
+      std::filesystem::exists(px4_etc_path) &&
+      std::filesystem::exists(px4_rcS_path)) {
+    px4_dir_ = px4_dir_to_check;
+    RCLCPP_INFO(this->get_logger(), "%s PX4 build directory found at: %s", 
+                px4_dir_param_.empty() ? "Default" : "Custom", 
+                px4_dir_.c_str());
+    RCLCPP_INFO(this->get_logger(), "PX4 executable found at: %s", 
+                px4_exec_path.c_str());
   } else {
-    // Check default path
-    std::string default_px4_dir = pkg_px4_sim + "/px4_sitl_default";
-    std::string default_px4_exec_path = default_px4_dir + "/bin/px4";
-    std::string default_px4_etc_path = default_px4_dir + "/etc";
-    std::string default_px4_rcS_path = default_px4_dir + "/etc/init.d-posix/rcS";
-    
-    if (std::filesystem::exists(default_px4_exec_path) && 
-        (std::filesystem::status(default_px4_exec_path).permissions() & 
-         std::filesystem::perms::owner_exec) != std::filesystem::perms::none &&
-        std::filesystem::exists(default_px4_etc_path) &&
-        std::filesystem::exists(default_px4_rcS_path)) {
-      px4_dir_ = default_px4_dir;
-      RCLCPP_INFO(this->get_logger(), "Using default PX4 build directory: %s", 
-                  px4_dir_.c_str());
-      RCLCPP_INFO(this->get_logger(), "PX4 executable found at: %s", 
-                  default_px4_exec_path.c_str());
-    } else {
-      RCLCPP_ERROR(this->get_logger(), 
-                  "Default PX4 build directory not valid at: %s", 
-                  default_px4_dir.c_str());
-      RCLCPP_ERROR(this->get_logger(), 
-                  "PX4 build directory must contain bin/px4 executable and etc/init.d-posix/rcS script");
-      throw std::runtime_error("Default PX4 build directory not valid");
-    }
+    RCLCPP_ERROR(this->get_logger(), 
+                "%s PX4 build directory not valid at: %s", 
+                px4_dir_param_.empty() ? "Default" : "Custom",
+                px4_dir_to_check.c_str());
+    RCLCPP_ERROR(this->get_logger(), 
+                "PX4 build directory must contain bin/px4 executable and etc/init.d-posix/rcS script");
+    throw std::runtime_error("PX4 build directory not valid");
   }
   
   // Validate MicroXRCE-DDS Agent executable path
-  if (!xrce_agent_path_param_.empty()) {
-    // Check custom path
-    if (std::filesystem::exists(xrce_agent_path_param_) && 
-        (std::filesystem::status(xrce_agent_path_param_).permissions() & 
-         std::filesystem::perms::owner_exec) != std::filesystem::perms::none) {
-      xrce_agent_path_ = xrce_agent_path_param_;
-      RCLCPP_INFO(this->get_logger(), "Custom MicroXRCE-DDS Agent found at: %s", 
-                  xrce_agent_path_.c_str());
-    } else {
-      RCLCPP_ERROR(this->get_logger(), 
-                  "Custom MicroXRCE-DDS Agent not found or not executable at: %s", 
-                  xrce_agent_path_param_.c_str());
-      throw std::runtime_error("Invalid MicroXRCE-DDS Agent executable path");
-    }
+  std::string xrce_agent_to_check = xrce_agent_path_param_;
+  if (xrce_agent_to_check.empty()) {
+    xrce_agent_to_check = pkg_px4_sim + "/bin/MicroXRCEAgent";
+  }
+  
+  // Check MicroXRCE-DDS Agent
+  if (std::filesystem::exists(xrce_agent_to_check) && 
+      (std::filesystem::status(xrce_agent_to_check).permissions() & 
+       std::filesystem::perms::owner_exec) != std::filesystem::perms::none) {
+    xrce_agent_path_ = xrce_agent_to_check;
+    RCLCPP_INFO(this->get_logger(), "Using %s MicroXRCE-DDS Agent: %s", 
+                xrce_agent_path_param_.empty() ? "default" : "custom",
+                xrce_agent_path_.c_str());
   } else {
-    // Check default path
-    std::string default_xrce_agent_path = pkg_px4_sim + "/bin/MicroXRCEAgent";
-    if (std::filesystem::exists(default_xrce_agent_path) && 
-        (std::filesystem::status(default_xrce_agent_path).permissions() & 
-         std::filesystem::perms::owner_exec) != std::filesystem::perms::none) {
-      xrce_agent_path_ = default_xrce_agent_path;
-      RCLCPP_INFO(this->get_logger(), "Using default MicroXRCE-DDS Agent: %s", 
-                  xrce_agent_path_.c_str());
-    } else {
-      RCLCPP_ERROR(this->get_logger(), 
-                  "Default MicroXRCE-DDS Agent not found or not executable at: %s", 
-                  default_xrce_agent_path.c_str());
-      throw std::runtime_error("Default MicroXRCE-DDS Agent not found or not executable");
-    }
+    RCLCPP_ERROR(this->get_logger(), 
+                "%s MicroXRCE-DDS Agent not found or not executable at: %s", 
+                xrce_agent_path_param_.empty() ? "Default" : "Custom",
+                xrce_agent_to_check.c_str());
+    throw std::runtime_error("MicroXRCE-DDS Agent not found or not executable");
   }
 
   // Initialize the clock publisher
@@ -303,11 +273,7 @@ void SimulationServer::execute_start(
       }
     }
 
-    // 4. Get path to PX4 build directory
-    std::string pkg_px4_sim =
-        ament_index_cpp::get_package_share_directory("robotsix_px4_simulation");
-    
-    // PX4 directory was already validated during initialization
+    // 4. PX4 directory was already validated during initialization
     RCLCPP_INFO(this->get_logger(), "Using PX4 build directory: %s", px4_dir_.c_str());
     std::string px4_exec_path = px4_dir_ + "/bin/px4";
 
@@ -344,14 +310,11 @@ void SimulationServer::execute_start(
     }
 
     // 6. Launch MicroXRCEAgent
-    std::string xrce_agent_path;
-    
     // MicroXRCE-DDS Agent path was already validated during initialization
-    std::string xrce_agent_path = xrce_agent_path_;
-    RCLCPP_INFO(this->get_logger(), "Using MicroXRCE-DDS Agent: %s", xrce_agent_path.c_str());
+    RCLCPP_INFO(this->get_logger(), "Using MicroXRCE-DDS Agent: %s", xrce_agent_path_.c_str());
     std::vector<std::string> agent_args = {"udp4", "-p", "8888"};
     xrce_agent_pid_ =
-        launch_process(xrce_agent_path, agent_args, "MicroXRCEAgent");
+        launch_process(xrce_agent_path_, agent_args, "MicroXRCEAgent");
     if (xrce_agent_pid_ < 0) {
       result->message = "Failed to launch MicroXRCEAgent process";
       shutdown_simulation();
