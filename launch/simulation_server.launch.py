@@ -53,8 +53,8 @@ def copy_px4_params(context):
                 ),
                 "headless_mode": LaunchConfiguration("headless_mode"),
                 "px4_params_folder": LaunchConfiguration("px4_params_folder"),
-                "custom_px4_path": LaunchConfiguration("custom_px4_path"),
-                "custom_xrce_agent_path": LaunchConfiguration("custom_xrce_agent_path"),
+                "px4_path": LaunchConfiguration("px4_path"),
+                "xrce_agent_path": LaunchConfiguration("xrce_agent_path"),
             }
         ],
     )
@@ -84,18 +84,18 @@ def generate_launch_description():
         description="Run Gazebo in headless mode without GUI",
     )
     
-    # Declare launch argument for custom PX4 path
-    custom_px4_path_arg = DeclareLaunchArgument(
-        "custom_px4_path",
+    # Declare launch argument for PX4 path
+    px4_path_arg = DeclareLaunchArgument(
+        "px4_path",
         default_value="",
-        description="Custom path to PX4 executable",
+        description="Path to PX4 executable",
     )
     
-    # Declare launch argument for custom MicroXRCE-DDS Agent path
-    custom_xrce_agent_path_arg = DeclareLaunchArgument(
-        "custom_xrce_agent_path",
+    # Declare launch argument for MicroXRCE-DDS Agent path
+    xrce_agent_path_arg = DeclareLaunchArgument(
+        "xrce_agent_path",
         default_value="",
-        description="Custom path to MicroXRCE-DDS Agent executable",
+        description="Path to MicroXRCE-DDS Agent executable",
     )
 
     # Create the launch description
@@ -105,8 +105,8 @@ def generate_launch_description():
     ld.add_action(px4_params_folder_arg)
     ld.add_action(hide_output_arg)
     ld.add_action(headless_arg)
-    ld.add_action(custom_px4_path_arg)
-    ld.add_action(custom_xrce_agent_path_arg)
+    ld.add_action(px4_path_arg)
+    ld.add_action(xrce_agent_path_arg)
 
     # Add the setup and node launch via OpaqueFunction
     # This ensures the parameter copying happens before the node is created

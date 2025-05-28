@@ -44,25 +44,25 @@ SimulationServer::SimulationServer()
   this->declare_parameter<bool>("headless_mode", false);
   this->get_parameter("headless_mode", headless_mode_);
 
-  this->declare_parameter<std::string>("custom_px4_path", "");
-  this->get_parameter("custom_px4_path", custom_px4_path_);
+  this->declare_parameter<std::string>("px4_path", "");
+  this->get_parameter("px4_path", px4_path_);
 
-  this->declare_parameter<std::string>("custom_xrce_agent_path", "");
-  this->get_parameter("custom_xrce_agent_path", custom_xrce_agent_path_);
+  this->declare_parameter<std::string>("xrce_agent_path", "");
+  this->get_parameter("xrce_agent_path", xrce_agent_path_);
 
   RCLCPP_INFO(this->get_logger(), "Simulation process output hiding: %s",
               hide_simulation_process_output_ ? "enabled" : "disabled");
   RCLCPP_INFO(this->get_logger(), "Headless mode: %s",
               headless_mode_ ? "enabled" : "disabled");
   
-  if (!custom_px4_path_.empty()) {
+  if (!px4_path_.empty()) {
     RCLCPP_INFO(this->get_logger(), "Using custom PX4 path: %s", 
-                custom_px4_path_.c_str());
+                px4_path_.c_str());
   }
   
-  if (!custom_xrce_agent_path_.empty()) {
+  if (!xrce_agent_path_.empty()) {
     RCLCPP_INFO(this->get_logger(), "Using custom MicroXRCE-DDS Agent path: %s", 
-                custom_xrce_agent_path_.c_str());
+                xrce_agent_path_.c_str());
   }
 
   // Initialize the clock publisher
@@ -231,8 +231,8 @@ void SimulationServer::execute_start(
     std::string px4_path;
     
     // Use custom PX4 path if provided, otherwise use the default
-    if (!custom_px4_path_.empty()) {
-      px4_path = custom_px4_path_;
+    if (!px4_path_.empty()) {
+      px4_path = px4_path_;
       RCLCPP_INFO(this->get_logger(), "Using custom PX4 executable: %s", 
                   px4_path.c_str());
     } else {
@@ -277,8 +277,8 @@ void SimulationServer::execute_start(
     std::string xrce_agent_path;
     
     // Use custom MicroXRCE-DDS Agent path if provided, otherwise use the default
-    if (!custom_xrce_agent_path_.empty()) {
-      xrce_agent_path = custom_xrce_agent_path_;
+    if (!xrce_agent_path_.empty()) {
+      xrce_agent_path = xrce_agent_path_;
       RCLCPP_INFO(this->get_logger(), "Using custom MicroXRCE-DDS Agent: %s", 
                   xrce_agent_path.c_str());
     } else {

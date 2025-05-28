@@ -133,15 +133,15 @@ you can provide custom paths to their executables:
 
 ```bash
 # Launch with custom PX4 executable
-ros2 launch robotsix_px4_simulation simulation_server.launch.py custom_px4_path:=/path/to/your/px4
+ros2 launch robotsix_px4_simulation simulation_server.launch.py px4_path:=/path/to/your/px4
 
 # Launch with custom MicroXRCE-DDS Agent executable
-ros2 launch robotsix_px4_simulation simulation_server.launch.py custom_xrce_agent_path:=/path/to/your/MicroXRCEAgent
+ros2 launch robotsix_px4_simulation simulation_server.launch.py xrce_agent_path:=/path/to/your/MicroXRCEAgent
 
 # Launch with both custom executables
 ros2 launch robotsix_px4_simulation simulation_server.launch.py \
-  custom_px4_path:=/path/to/your/px4 \
-  custom_xrce_agent_path:=/path/to/your/MicroXRCEAgent
+  px4_path:=/path/to/your/px4 \
+  xrce_agent_path:=/path/to/your/MicroXRCEAgent
 ```
 
 This is particularly useful when you've built the package with `SKIP_PX4_INSTALL=ON` or `SKIP_MICRODDS_INSTALL=ON`.

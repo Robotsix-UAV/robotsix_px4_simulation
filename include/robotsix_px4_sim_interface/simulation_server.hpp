@@ -63,11 +63,11 @@ public:
   /** @brief Flag to control if Gazebo runs in headless mode without GUI */
   bool headless_mode_;
 
-  /** @brief Custom path to PX4 executable */
-  std::string custom_px4_path_;
+  /** @brief Path to PX4 executable */
+  std::string px4_path_;
 
-  /** @brief Custom path to MicroXRCE-DDS Agent executable */
-  std::string custom_xrce_agent_path_;
+  /** @brief Path to MicroXRCE-DDS Agent executable */
+  std::string xrce_agent_path_;
 
 private:
   /** @brief Action server for StartSimulation action */
