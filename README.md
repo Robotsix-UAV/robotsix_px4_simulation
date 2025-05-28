@@ -132,15 +132,15 @@ If you've built PX4 or MicroXRCE-DDS Agent separately (or skipped their installa
 you can provide custom paths to their executables:
 
 ```bash
-# Launch with custom PX4 executable
-ros2 launch robotsix_px4_simulation simulation_server.launch.py px4_path:=/path/to/your/px4
+# Launch with custom PX4 build directory
+ros2 launch robotsix_px4_simulation simulation_server.launch.py px4_dir:=/path/to/your/px4_sitl_default
 
 # Launch with custom MicroXRCE-DDS Agent executable
 ros2 launch robotsix_px4_simulation simulation_server.launch.py xrce_agent_path:=/path/to/your/MicroXRCEAgent
 
-# Launch with both custom executables
+# Launch with both custom paths
 ros2 launch robotsix_px4_simulation simulation_server.launch.py \
-  px4_path:=/path/to/your/px4 \
+  px4_dir:=/path/to/your/px4_sitl_default \
   xrce_agent_path:=/path/to/your/MicroXRCEAgent
 ```
 

@@ -53,7 +53,7 @@ def copy_px4_params(context):
                 ),
                 "headless_mode": LaunchConfiguration("headless_mode"),
                 "px4_params_folder": LaunchConfiguration("px4_params_folder"),
-                "px4_path": LaunchConfiguration("px4_path"),
+                "px4_dir": LaunchConfiguration("px4_dir"),
                 "xrce_agent_path": LaunchConfiguration("xrce_agent_path"),
             }
         ],
@@ -84,11 +84,11 @@ def generate_launch_description():
         description="Run Gazebo in headless mode without GUI",
     )
     
-    # Declare launch argument for PX4 path
-    px4_path_arg = DeclareLaunchArgument(
-        "px4_path",
+    # Declare launch argument for PX4 build directory
+    px4_dir_arg = DeclareLaunchArgument(
+        "px4_dir",
         default_value="",
-        description="Path to PX4 executable",
+        description="Path to PX4 build directory (containing bin/px4 and etc/)",
     )
     
     # Declare launch argument for MicroXRCE-DDS Agent path
@@ -105,7 +105,7 @@ def generate_launch_description():
     ld.add_action(px4_params_folder_arg)
     ld.add_action(hide_output_arg)
     ld.add_action(headless_arg)
-    ld.add_action(px4_path_arg)
+    ld.add_action(px4_dir_arg)
     ld.add_action(xrce_agent_path_arg)
 
     # Add the setup and node launch via OpaqueFunction

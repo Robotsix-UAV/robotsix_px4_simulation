@@ -44,8 +44,8 @@ SimulationServer::SimulationServer()
   this->declare_parameter<bool>("headless_mode", false);
   this->get_parameter("headless_mode", headless_mode_);
 
-  this->declare_parameter<std::string>("px4_path", "");
-  this->get_parameter("px4_path", px4_path_param_);
+  this->declare_parameter<std::string>("px4_dir", "");
+  this->get_parameter("px4_dir", px4_dir_param_);
 
   this->declare_parameter<std::string>("xrce_agent_path", "");
   this->get_parameter("xrce_agent_path", xrce_agent_path_param_);
@@ -59,35 +59,55 @@ SimulationServer::SimulationServer()
   std::string pkg_px4_sim = 
       ament_index_cpp::get_package_share_directory("robotsix_px4_simulation");
   
-  // Validate PX4 executable path
-  if (!px4_path_param_.empty()) {
+  // Validate PX4 build directory
+  if (!px4_dir_param_.empty()) {
     // Check custom path
-    if (std::filesystem::exists(px4_path_param_) && 
-        (std::filesystem::status(px4_path_param_).permissions() & 
-         std::filesystem::perms::owner_exec) != std::filesystem::perms::none) {
-      px4_path_ = px4_path_param_;
-      RCLCPP_INFO(this->get_logger(), "Custom PX4 executable found at: %s", 
-                  px4_path_.c_str());
+    std::string px4_exec_path = px4_dir_param_ + "/bin/px4";
+    std::string px4_etc_path = px4_dir_param_ + "/etc";
+    std::string px4_rcS_path = px4_dir_param_ + "/etc/init.d-posix/rcS";
+    
+    if (std::filesystem::exists(px4_exec_path) && 
+        (std::filesystem::status(px4_exec_path).permissions() & 
+         std::filesystem::perms::owner_exec) != std::filesystem::perms::none &&
+        std::filesystem::exists(px4_etc_path) &&
+        std::filesystem::exists(px4_rcS_path)) {
+      px4_dir_ = px4_dir_param_;
+      RCLCPP_INFO(this->get_logger(), "Custom PX4 build directory found at: %s", 
+                  px4_dir_.c_str());
+      RCLCPP_INFO(this->get_logger(), "PX4 executable found at: %s", 
+                  px4_exec_path.c_str());
     } else {
       RCLCPP_ERROR(this->get_logger(), 
-                  "Custom PX4 executable not found or not executable at: %s", 
-                  px4_path_param_.c_str());
-      throw std::runtime_error("Invalid PX4 executable path");
+                  "Invalid PX4 build directory at: %s", 
+                  px4_dir_param_.c_str());
+      RCLCPP_ERROR(this->get_logger(), 
+                  "PX4 build directory must contain bin/px4 executable and etc/init.d-posix/rcS script");
+      throw std::runtime_error("Invalid PX4 build directory");
     }
   } else {
     // Check default path
-    std::string default_px4_path = pkg_px4_sim + "/px4_sitl_default/bin/px4";
-    if (std::filesystem::exists(default_px4_path) && 
-        (std::filesystem::status(default_px4_path).permissions() & 
-         std::filesystem::perms::owner_exec) != std::filesystem::perms::none) {
-      px4_path_ = default_px4_path;
-      RCLCPP_INFO(this->get_logger(), "Using default PX4 executable: %s", 
-                  px4_path_.c_str());
+    std::string default_px4_dir = pkg_px4_sim + "/px4_sitl_default";
+    std::string default_px4_exec_path = default_px4_dir + "/bin/px4";
+    std::string default_px4_etc_path = default_px4_dir + "/etc";
+    std::string default_px4_rcS_path = default_px4_dir + "/etc/init.d-posix/rcS";
+    
+    if (std::filesystem::exists(default_px4_exec_path) && 
+        (std::filesystem::status(default_px4_exec_path).permissions() & 
+         std::filesystem::perms::owner_exec) != std::filesystem::perms::none &&
+        std::filesystem::exists(default_px4_etc_path) &&
+        std::filesystem::exists(default_px4_rcS_path)) {
+      px4_dir_ = default_px4_dir;
+      RCLCPP_INFO(this->get_logger(), "Using default PX4 build directory: %s", 
+                  px4_dir_.c_str());
+      RCLCPP_INFO(this->get_logger(), "PX4 executable found at: %s", 
+                  default_px4_exec_path.c_str());
     } else {
       RCLCPP_ERROR(this->get_logger(), 
-                  "Default PX4 executable not found or not executable at: %s", 
-                  default_px4_path.c_str());
-      throw std::runtime_error("Default PX4 executable not found or not executable");
+                  "Default PX4 build directory not valid at: %s", 
+                  default_px4_dir.c_str());
+      RCLCPP_ERROR(this->get_logger(), 
+                  "PX4 build directory must contain bin/px4 executable and etc/init.d-posix/rcS script");
+      throw std::runtime_error("Default PX4 build directory not valid");
     }
   }
   
@@ -283,12 +303,13 @@ void SimulationServer::execute_start(
       }
     }
 
-    // 4. Get path to PX4 executable
+    // 4. Get path to PX4 build directory
     std::string pkg_px4_sim =
         ament_index_cpp::get_package_share_directory("robotsix_px4_simulation");
     
-    // PX4 path was already validated during initialization
-    RCLCPP_INFO(this->get_logger(), "Using PX4 executable: %s", px4_path_.c_str());
+    // PX4 directory was already validated during initialization
+    RCLCPP_INFO(this->get_logger(), "Using PX4 build directory: %s", px4_dir_.c_str());
+    std::string px4_exec_path = px4_dir_ + "/bin/px4";
 
     // 5. Launch PX4 for each model
     int instance_id = 0; // Start with instance ID 0
@@ -301,14 +322,14 @@ void SimulationServer::execute_start(
 
       // Launch PX4
       std::vector<std::string> px4_args = {
-          pkg_px4_sim + "/px4_sitl_default/etc",
+          px4_dir_ + "/etc",
           "-s",
-          pkg_px4_sim + "/px4_sitl_default/etc/init.d-posix/rcS",
+          px4_dir_ + "/etc/init.d-posix/rcS",
           "-w",
-          pkg_px4_sim + "/px4_sitl_default",
+          px4_dir_,
           "-i",
           std::to_string(instance_id)}; // Use integer instance ID
-      pid_t px4_pid = launch_process(px4_path_, px4_args,
+      pid_t px4_pid = launch_process(px4_exec_path, px4_args,
                                      "PX4 for " + model_info.model_name);
       if (px4_pid < 0) {
         result->message =
