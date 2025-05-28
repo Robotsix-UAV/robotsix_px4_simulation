@@ -66,29 +66,7 @@ if(NOT SKIP_PX4_INSTALL)
 
     EXCLUDE_FROM_ALL      1                 # Don’t hook into the “all” target :contentReference[oaicite:5]{index=5}
   )
-endif()
 
-# Setup Micro XRCE-DDS Agent as an external project (only if not skipping)
-if(NOT SKIP_MICRODDS_INSTALL)
-  ExternalProject_Add(micro_xrce_dds_agent
-    GIT_REPOSITORY https://github.com/eProsima/Micro-XRCE-DDS-Agent.git
-    GIT_TAG v2.4.2 # TODO: might be different for v1.14 or ros jazzy
-    GIT_SHALLOW ON
-    GIT_PROGRESS ON
-    
-    CMAKE_ARGS
-      -DCMAKE_BUILD_TYPE=Release
-      -DUAGENT_BUILD_EXECUTABLE=ON
-      -DUAGENT_USE_SYSTEM_FASTDDS=ON
-
-    INSTALL_COMMAND ""
-    
-    BUILD_BYPRODUCTS ${CMAKE_BINARY_DIR}/micro_xrce_dds_agent-prefix/src/micro_xrce_dds_agent-build/microxrcedds_agent
-  )
-endif()
-
-# Create Python virtual environment and build PX4 (only if not skipping)
-if(NOT SKIP_PX4_INSTALL)
   # Create Python virtual environment for PX4 build
   add_custom_target(px4_venv
     COMMAND python3 -m venv ${PX4_AUTOPILOT_DIR}/px4_venv
@@ -113,10 +91,8 @@ if(NOT SKIP_PX4_INSTALL)
     DEPENDS px4_dds_config
     COMMENT "Building PX4 Autopilot ${PX4_VERSION} SITL"
   )
-endif()
 
-# Copy the full PX4_AUTOPILOT build directory to the install directory if not skipped
-if(NOT SKIP_PX4_INSTALL)
+  # Install PX4 SITL build directory
   install(
     DIRECTORY ${PX4_AUTOPILOT_DIR}/build/px4_sitl_default/
     DESTINATION share/${PROJECT_NAME}/px4_sitl_default
@@ -141,14 +117,31 @@ if(NOT SKIP_PX4_INSTALL)
   )
 endif()
 
-# Install MicroXRCE Agent executable if not skipped
+# Setup Micro XRCE-DDS Agent as an external project
 if(NOT SKIP_MICRODDS_INSTALL)
+  ExternalProject_Add(micro_xrce_dds_agent
+    GIT_REPOSITORY https://github.com/eProsima/Micro-XRCE-DDS-Agent.git
+    GIT_TAG v2.4.2 # TODO: might be different for v1.14 or ros jazzy
+    GIT_SHALLOW ON
+    GIT_PROGRESS ON
+    
+    CMAKE_ARGS
+      -DCMAKE_BUILD_TYPE=Release
+      -DUAGENT_BUILD_EXECUTABLE=ON
+      -DUAGENT_USE_SYSTEM_FASTDDS=ON
+
+    INSTALL_COMMAND ""
+    
+    BUILD_BYPRODUCTS ${CMAKE_BINARY_DIR}/micro_xrce_dds_agent-prefix/src/micro_xrce_dds_agent-build/microxrcedds_agent
+  )
+
   install(
     FILES ${CMAKE_BINARY_DIR}/micro_xrce_dds_agent-prefix/src/micro_xrce_dds_agent-build/MicroXRCEAgent
     DESTINATION share/${PROJECT_NAME}/bin
     PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
   )
 endif()
+
 
 # Build simulation server
 add_executable(simulation_server src/simulation_server.cpp)
