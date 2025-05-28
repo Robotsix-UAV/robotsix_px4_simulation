@@ -168,6 +168,8 @@ ros2 action send_goal /start_simulation robotsix_px4_sim_interface/action/StartS
   model_name: 'x500', px4_parameters: 4001, x: 0.0, y: 0.0, z: 0.0}]}"
 ```
 
+> **Note:** The PX4 models are not available if the package is built with the `SKIP_PX4_INSTALL=ON` option.
+
 ### DDS Topics
 
 To configure which PX4 topics are published over DDS, edit the configuration file 
