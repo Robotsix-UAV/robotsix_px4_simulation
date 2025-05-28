@@ -134,6 +134,17 @@ install(
   USE_SOURCE_PERMISSIONS
 )
 
+# Install PX4 SITL config files to the installed build directory
+file(GLOB CONFIG_FILES "${CMAKE_CURRENT_SOURCE_DIR}/config/px4_parameters/*")
+foreach(CONFIG_FILE ${CONFIG_FILES})
+  get_filename_component(CONFIG_NAME ${CONFIG_FILE} NAME)
+  install(
+    FILES ${CONFIG_FILE}
+    DESTINATION share/${PROJECT_NAME}/px4_sitl_default/etc/init.d-posix/airframes
+    PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ
+  )
+endforeach()
+
 # Install MicroXRCE Agent executable
 install(
 	FILES ${CMAKE_BINARY_DIR}/micro_xrce_dds_agent-prefix/src/micro_xrce_dds_agent-build/MicroXRCEAgent
