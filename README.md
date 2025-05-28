@@ -246,7 +246,6 @@ docker build -t robotsix/px4_simulation .
 
 ## TODO
 - Add support for PX4 v1.15.x
-- ✅ Allow to skip install of Px4/MicroDDS and provide custom path to it for the server.
 - Parameter generation
   - Automatic generation of PX4 parameters for quadcopters
   - Match parameters with those used by xacro files
