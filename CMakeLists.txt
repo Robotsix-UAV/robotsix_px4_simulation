@@ -43,7 +43,7 @@ if(VERSION_INDEX EQUAL -1)
 endif()
 
 
-# Set PX4² Autopilot directory
+# Set PX4 Autopilot directory
 set(PX4_AUTOPILOT_DIR ${CMAKE_BINARY_DIR}/PX4-Autopilot)
 include(ExternalProject)
 
@@ -108,25 +108,6 @@ add_custom_target(px4_autopilot ALL
   COMMENT "Building PX4 Autopilot ${PX4_VERSION} SITL"
 )
 
-# Create custom target to copy PX4 SITL config files
-add_custom_target(copy_px4_configs ALL
-  COMMENT "Copying PX4 SITL config files"
-  DEPENDS px4_autopilot
-)
-
-# Add custom commands to copy each file
-file(GLOB CONFIG_FILES "${CMAKE_CURRENT_SOURCE_DIR}/config/px4_parameters/*")
-foreach(CONFIG_FILE ${CONFIG_FILES})
-  get_filename_component(CONFIG_NAME ${CONFIG_FILE} NAME)
-  add_custom_command(
-    TARGET copy_px4_configs
-    COMMAND ${CMAKE_COMMAND} -E copy
-      ${CONFIG_FILE}
-      ${PX4_AUTOPILOT_DIR}/build/px4_sitl_default/etc/init.d-posix/airframes/${CONFIG_NAME}
-    COMMENT "Copying ${CONFIG_NAME} to PX4 SITL configuration"
-  )
-endforeach()
-
 # Copy the full PX4_AUTOPILOT build directory to the install directory
 install(
   DIRECTORY ${PX4_AUTOPILOT_DIR}/build/px4_sitl_default/
@@ -147,7 +128,7 @@ endforeach()
 
 # Install MicroXRCE Agent executable
 install(
-	FILES ${CMAKE_BINARY_DIR}/micro_xrce_dds_agent-prefix/src/micro_xrce_dds_agent-build/MicroXRCEAgent
+  FILES ${CMAKE_BINARY_DIR}/micro_xrce_dds_agent-prefix/src/micro_xrce_dds_agent-build/MicroXRCEAgent
   DESTINATION share/${PROJECT_NAME}/bin
   PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
 )
@@ -177,7 +158,7 @@ install(TARGETS
 install(
   DIRECTORY config/
   DESTINATION share/${PROJECT_NAME}/config
-  FILES_MATCHING PATTERN "*.yaml"
+  FILES_MATCHING PATTERN "*.yaml" PATTERN "*.yml"
 )
 
 # Install worlds
@@ -185,11 +166,6 @@ install(
   DIRECTORY worlds/
   DESTINATION share/${PROJECT_NAME}/worlds
   FILES_MATCHING PATTERN "*.sdf" PATTERN "*.world"
-)
-
-# Add custom target to generate SDF files from XACRO
-add_custom_target(generate_sdf_from_xacro ALL
-  COMMENT "Generating SDF files from XACRO templates"
 )
 
 # Install models
