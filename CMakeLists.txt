@@ -31,51 +31,42 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)
 endif()
 
+include(ExternalProject)
+
 # Options to skip PX4 and MicroDDS installation
 option(SKIP_PX4_INSTALL "Skip PX4 Autopilot download and build" OFF)
 option(SKIP_MICRODDS_INSTALL "Skip MicroXRCE-DDS Agent download and build" OFF)
 
-# Define PX4 version options (only used if not skipping PX4 install)
-if(NOT DEFINED PX4_VERSION)
-  set(PX4_VERSION "v1.14.4")
-endif()
-
 if(NOT SKIP_PX4_INSTALL)
+  if(NOT DEFINED PX4_VERSION)
+    set(PX4_VERSION "v1.14.4")
+  endif()
   set(ALLOWED_PX4_VERSIONS "v1.14.0;v1.14.1;v1.14.2;v1.14.3;v1.14.4")
   list(FIND ALLOWED_PX4_VERSIONS "${PX4_VERSION}" VERSION_INDEX)
   if(VERSION_INDEX EQUAL -1)
     message(FATAL_ERROR "Invalid PX4 version: ${PX4_VERSION}. Allowed versions: ${ALLOWED_PX4_VERSIONS}")
   endif()
-endif()
-
-
-# Set PX4 Autopilot directory
-if(NOT SKIP_PX4_INSTALL)
   set(PX4_AUTOPILOT_DIR ${CMAKE_BINARY_DIR}/PX4-Autopilot)
-else()
-  # When skipping PX4 installation, still define the directory for reference
-  set(PX4_AUTOPILOT_DIR "")
+
+  # Setup PX4-Autopilot
+  ExternalProject_Add(px4_download
+    GIT_REPOSITORY        https://github.com/PX4/PX4-Autopilot.git
+    GIT_TAG               ${PX4_VERSION}
+    GIT_SHALLOW           ON               
+    GIT_SUBMODULES_RECURSE ON              
+    GIT_PROGRESS          ON               
+
+    SOURCE_DIR            ${PX4_AUTOPILOT_DIR}
+
+    # Disable all build steps so no targets are generated:
+    UPDATE_COMMAND        ""
+    CONFIGURE_COMMAND     ""
+    BUILD_COMMAND         ""
+    INSTALL_COMMAND       ""
+
+    EXCLUDE_FROM_ALL      1                 # Don’t hook into the “all” target :contentReference[oaicite:5]{index=5}
+  )
 endif()
-include(ExternalProject)
-
-# Setup PX4-Autopilot
-ExternalProject_Add(px4_download
-  GIT_REPOSITORY        https://github.com/PX4/PX4-Autopilot.git
-  GIT_TAG               ${PX4_VERSION}
-  GIT_SHALLOW           ON               
-  GIT_SUBMODULES_RECURSE ON              
-  GIT_PROGRESS          ON               
-
-  SOURCE_DIR            ${PX4_AUTOPILOT_DIR}
-
-  # Disable all build steps so no targets are generated:
-  UPDATE_COMMAND        ""
-  CONFIGURE_COMMAND     ""
-  BUILD_COMMAND         ""
-  INSTALL_COMMAND       ""
-
-  EXCLUDE_FROM_ALL      1                 # Don’t hook into the “all” target :contentReference[oaicite:5]{index=5}
-)
 
 # Setup Micro XRCE-DDS Agent as an external project (only if not skipping)
 if(NOT SKIP_MICRODDS_INSTALL)
