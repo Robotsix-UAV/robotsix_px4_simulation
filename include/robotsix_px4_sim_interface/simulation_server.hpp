@@ -68,6 +68,12 @@ public:
 
   /** @brief Path to MicroXRCE-DDS Agent executable */
   std::string xrce_agent_path_;
+  
+  /** @brief Validated path to PX4 executable */
+  std::string validated_px4_path_;
+  
+  /** @brief Validated path to MicroXRCE-DDS Agent executable */
+  std::string validated_xrce_agent_path_;
 
 private:
   /** @brief Action server for StartSimulation action */
