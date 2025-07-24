@@ -89,3 +89,7 @@ subscriptions:
     type: px4_msgs::msg::SensorOpticalFlow
   - topic: /fmu/in/telemetry_status
     type: px4_msgs::msg::TelemetryStatus
+
+  # Manual control setpoints (to simulate joystick inputs)
+  - topic: /fmu/in/manual_control_setpoint
+    type: px4_msgs::msg::ManualControlSetpoint
