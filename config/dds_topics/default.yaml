@@ -89,7 +89,3 @@ subscriptions:
     type: px4_msgs::msg::SensorOpticalFlow
   - topic: /fmu/in/telemetry_status
     type: px4_msgs::msg::TelemetryStatus
-
-  # RC Channel topics (for overriding manual control)
-  - topic: /fmu/in/rc_channels
-    type: px4_msgs::msg::RcChannels

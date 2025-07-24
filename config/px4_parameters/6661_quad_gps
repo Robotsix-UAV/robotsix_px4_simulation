@@ -71,7 +71,7 @@ param set-default MC_PITCHRATE_K 0.5
 param set-default MC_YAW_P 1.0
 
 # In simulation, with no remote
-param set-default COM_RC_IN_MODE 4
+param set-default COM_RC_IN_MODE 1 # Joystick
 param set-default COM_OBL_RC_ACT 7
 param set-default COM_OF_LOSS_T 1.0
 param set-default COM_OBC_LOSS_T 1.0
