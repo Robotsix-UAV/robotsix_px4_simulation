@@ -86,3 +86,13 @@ param set-default FD_ACT_EN 0
 param set-default FD_ESCS_EN 0
 param set-default EKF2_REQ_VDRIFT 0.5
 
+# Use channel 5 (index 4) to control flight mode
+param set-default RC_MAP_FLTMODE 5
+
+# Enable flight mode slot 1–6
+param set-default COM_FLTMODE1 1  # MANUAL
+param set-default COM_FLTMODE2 2  # ALTITUDE
+param set-default COM_FLTMODE3 3  # POSITION
+param set-default COM_FLTMODE4 4  # AUTO_MISSION
+param set-default COM_FLTMODE5 5  # AUTO_LOITER
+param set-default COM_FLTMODE6 6  # AUTO_RTL
