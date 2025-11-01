@@ -14,6 +14,11 @@ param set-default SENS_EN_GPSSIM 0
 param set-default SENS_EN_BAROSIM 1
 param set-default SENS_EN_MAGSIM 1
 
+# Disable DDS timestamp synchronization (UXRCE_DDS_SYNCT 0)
+# In simulation, PX4 time is already aligned with simulator time.
+# We don't want the DDS client to realign timestamps back to OS time.
+param set-default UXRCE_DDS_SYNCT 0
+
 param set-default CA_AIRFRAME 0
 param set-default CA_ROTOR_COUNT 4
 
