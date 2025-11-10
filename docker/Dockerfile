@@ -1,4 +1,4 @@
-FROM ros:humble-ros-base
+FROM ros:jazzy-ros-base
 
 # Install dependencies
 RUN     apt-get update && \
@@ -6,7 +6,7 @@ RUN     apt-get update && \
 	curl https://packages.osrfoundation.org/gazebo.gpg | sudo gpg --dearmor -o /usr/share/keyrings/pkgs-osrf-archive-keyring.gpg && \
 	echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/pkgs-osrf-archive-keyring.gpg] http://packages.osrfoundation.org/gazebo/ubuntu-stable $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/gazebo-stable.list > /dev/null && \
 	apt-get update && \
-	apt-get install -y gz-garden \
+	apt-get install -y gz-harmonic \
 	&& apt remove -y curl \
 	&& apt-get clean \
 	&& rm -rf /var/lib/apt/lists/*
@@ -23,8 +23,8 @@ RUN apt-get update && \
 	apt-get clean && \
 	rm -rf /var/lib/apt/lists/*
 # Build the workspace
-RUN . /opt/ros/humble/setup.sh && \
-	colcon build && \
+RUN . /opt/ros/jazzy/setup.sh && \
+	colcon build --event-handlers=console_direct+ && \
 	apt-get clean && \
 	rm -rf /var/lib/apt/lists/*
 

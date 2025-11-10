@@ -10,7 +10,8 @@
 
 
   <!-- Macro for a basic quadrotor -->
-  <xacro:macro name="quadrotor_base" params="name
+  <xacro:macro name="quadrotor_base"
+    params="name
                                         mass='1.0'
                                         ixx='0.03' ixy='0' ixz='0'
                                         iyy='0.03' iyz='0'
@@ -55,9 +56,9 @@
             </cylinder>
           </geometry>
           <material>
-              <ambient>0 1 0 1</ambient>
-              <diffuse>0 1 0 1</diffuse>
-              <specular>0 1 0 1</specular>
+            <ambient>0 1 0 1</ambient>
+            <diffuse>0 1 0 1</diffuse>
+            <specular>0 1 0 1</specular>
           </material>
         </visual>
         <collision name='base_link_collision'>
@@ -84,13 +85,13 @@
           <always_on>1</always_on>
           <update_rate>250</update_rate>
           <imu>
-            <xacro:imu_noise_params 
+            <xacro:imu_noise_params
               gyro_noise_density="${gyro_noise_density}"
               gyro_random_walk="${gyro_random_walk}"
               gyro_bias_correlation_time="${gyro_bias_correlation_time}"
               accel_noise_density="${accel_noise_density}"
               accel_random_walk="${accel_random_walk}"
-              accel_bias_correlation_time="${accel_bias_correlation_time}"/>
+              accel_bias_correlation_time="${accel_bias_correlation_time}" />
           </imu>
         </sensor>
         <sensor name="air_pressure_sensor" type="air_pressure">
@@ -105,12 +106,11 @@
             </pressure>
           </air_pressure>
         </sensor>
-        
         <xacro:insert_block name="additional_sensors" />
       </link>
 
       <xacro:insert_block name="model_plugin" />
-      
+
       <!-- Arms -->
       <link name="arm_0">
         <gravity>true</gravity>
@@ -132,9 +132,9 @@
             </box>
           </geometry>
           <material>
-              <ambient>0 1 0 1</ambient>
-              <diffuse>0 1 0 1</diffuse>
-              <specular>0 1 0 1</specular>
+            <ambient>0 1 0 1</ambient>
+            <diffuse>0 1 0 1</diffuse>
+            <specular>0 1 0 1</specular>
           </material>
         </visual>
         <collision name='arm_0_collision'>
@@ -161,7 +161,7 @@
         <child>arm_0</child>
         <parent>base_link</parent>
       </joint>
-      
+
       <link name="arm_1">
         <gravity>true</gravity>
         <self_collide>false</self_collide>
@@ -182,9 +182,9 @@
             </box>
           </geometry>
           <material>
-              <ambient>0 1 0 1</ambient>
-              <diffuse>0 1 0 1</diffuse>
-              <specular>0 1 0 1</specular>
+            <ambient>0 1 0 1</ambient>
+            <diffuse>0 1 0 1</diffuse>
+            <specular>0 1 0 1</specular>
           </material>
         </visual>
         <collision name='arm_1_collision'>
@@ -211,36 +211,37 @@
         <child>arm_1</child>
         <parent>base_link</parent>
       </joint>
-      
+
       <!-- Rotors -->
-      <xacro:rotor_macro rotor_id="0" 
-                         pos_x="0.3535533905932738" 
-                         pos_y="0.35355339059327373" 
-                         direction="cw" 
-                         max_motor_thrust="${max_motor_thrust}"/>
-                         
-      <xacro:rotor_macro rotor_id="1" 
-                         pos_x="-0.35355339059327373" 
-                         pos_y="0.3535533905932738" 
-                         direction="ccw" 
-                         max_motor_thrust="${max_motor_thrust}"/>
-                         
-      <xacro:rotor_macro rotor_id="2" 
-                         pos_x="-0.35355339059327384" 
-                         pos_y="-0.35355339059327373" 
-                         direction="cw" 
-                         max_motor_thrust="${max_motor_thrust}"/>
-                         
-      <xacro:rotor_macro rotor_id="3" 
-                         pos_x="0.3535533905932737" 
-                         pos_y="-0.35355339059327384" 
-                         direction="ccw" 
-                         max_motor_thrust="${max_motor_thrust}"/>
+      <xacro:rotor_macro rotor_id="0"
+        pos_x="0.3535533905932738"
+        pos_y="0.35355339059327373"
+        direction="cw"
+        max_motor_thrust="${max_motor_thrust}" />
+
+      <xacro:rotor_macro rotor_id="1"
+        pos_x="-0.35355339059327373"
+        pos_y="0.3535533905932738"
+        direction="ccw"
+        max_motor_thrust="${max_motor_thrust}" />
+
+      <xacro:rotor_macro rotor_id="2"
+        pos_x="-0.35355339059327384"
+        pos_y="-0.35355339059327373"
+        direction="cw"
+        max_motor_thrust="${max_motor_thrust}" />
+
+      <xacro:rotor_macro rotor_id="3"
+        pos_x="0.3535533905932737"
+        pos_y="-0.35355339059327384"
+        direction="ccw"
+        max_motor_thrust="${max_motor_thrust}" />
     </model>
   </xacro:macro>
 
   <!-- Macro for a single axis IMU noise -->
-  <xacro:macro name="imu_axis_noise" params="stddev dynamic_bias_stddev dynamic_bias_correlation_time">
+  <xacro:macro name="imu_axis_noise"
+    params="stddev dynamic_bias_stddev dynamic_bias_correlation_time">
     <noise type="gaussian">
       <mean>0</mean>
       <stddev>${stddev}</stddev>
@@ -250,7 +251,8 @@
   </xacro:macro>
 
   <!-- Macro for IMU sensor noise parameters -->
-  <xacro:macro name="imu_noise_params" params="gyro_noise_density='0.00018665' 
+  <xacro:macro name="imu_noise_params"
+    params="gyro_noise_density='0.00018665' 
                                               gyro_random_walk='3.8785e-05'
                                               gyro_bias_correlation_time='1000'
                                               accel_noise_density='0.00186'
@@ -258,36 +260,36 @@
 	  				      accel_bias_correlation_time='300'">
     <angular_velocity>
       <x>
-        <xacro:imu_axis_noise stddev="${gyro_noise_density}" 
-                             dynamic_bias_stddev="${gyro_random_walk}" 
-                             dynamic_bias_correlation_time="${gyro_bias_correlation_time}"/>
+        <xacro:imu_axis_noise stddev="${gyro_noise_density}"
+          dynamic_bias_stddev="${gyro_random_walk}"
+          dynamic_bias_correlation_time="${gyro_bias_correlation_time}" />
       </x>
       <y>
-        <xacro:imu_axis_noise stddev="${gyro_noise_density}" 
-                             dynamic_bias_stddev="${gyro_random_walk}" 
-                             dynamic_bias_correlation_time="${gyro_bias_correlation_time}"/>
+        <xacro:imu_axis_noise stddev="${gyro_noise_density}"
+          dynamic_bias_stddev="${gyro_random_walk}"
+          dynamic_bias_correlation_time="${gyro_bias_correlation_time}" />
       </y>
       <z>
-        <xacro:imu_axis_noise stddev="${gyro_noise_density}" 
-                             dynamic_bias_stddev="${gyro_random_walk}" 
-                             dynamic_bias_correlation_time="${gyro_bias_correlation_time}"/>
+        <xacro:imu_axis_noise stddev="${gyro_noise_density}"
+          dynamic_bias_stddev="${gyro_random_walk}"
+          dynamic_bias_correlation_time="${gyro_bias_correlation_time}" />
       </z>
     </angular_velocity>
     <linear_acceleration>
       <x>
-        <xacro:imu_axis_noise stddev="${accel_noise_density}" 
-                             dynamic_bias_stddev="${accel_random_walk}" 
-                             dynamic_bias_correlation_time="${accel_bias_correlation_time}"/>
+        <xacro:imu_axis_noise stddev="${accel_noise_density}"
+          dynamic_bias_stddev="${accel_random_walk}"
+          dynamic_bias_correlation_time="${accel_bias_correlation_time}" />
       </x>
       <y>
-        <xacro:imu_axis_noise stddev="${accel_noise_density}" 
-                             dynamic_bias_stddev="${accel_random_walk}" 
-                             dynamic_bias_correlation_time="${accel_bias_correlation_time}"/>
+        <xacro:imu_axis_noise stddev="${accel_noise_density}"
+          dynamic_bias_stddev="${accel_random_walk}"
+          dynamic_bias_correlation_time="${accel_bias_correlation_time}" />
       </y>
       <z>
-        <xacro:imu_axis_noise stddev="${accel_noise_density}" 
-                             dynamic_bias_stddev="${accel_random_walk}" 
-                             dynamic_bias_correlation_time="${accel_bias_correlation_time}"/>
+        <xacro:imu_axis_noise stddev="${accel_noise_density}"
+          dynamic_bias_stddev="${accel_random_walk}"
+          dynamic_bias_correlation_time="${accel_bias_correlation_time}" />
       </z>
     </linear_acceleration>
   </xacro:macro>
@@ -315,16 +317,16 @@
           </mesh>
         </geometry>
         <material>
-            <xacro:if value="${direction == 'cw'}">
-              <ambient>0 0 1 1</ambient>
-              <diffuse>0 0 1 1</diffuse>
-              <specular>0 0 1 1</specular>
-            </xacro:if>
-            <xacro:if value="${direction == 'ccw'}">
-              <ambient>1 0 0 1</ambient>
-              <diffuse>1 0 0 1</diffuse>
-              <specular>1 0 0 1</specular>
-            </xacro:if>
+          <xacro:if value="${direction == 'cw'}">
+            <ambient>0 0 1 1</ambient>
+            <diffuse>0 0 1 1</diffuse>
+            <specular>0 0 1 1</specular>
+          </xacro:if>
+          <xacro:if value="${direction == 'ccw'}">
+            <ambient>1 0 0 1</ambient>
+            <diffuse>1 0 0 1</diffuse>
+            <specular>1 0 0 1</specular>
+          </xacro:if>
         </material>
       </visual>
       <collision name='rotor_${rotor_id}_collision'>
@@ -361,7 +363,7 @@
       </axis>
     </joint>
     <plugin filename="gz-sim-multicopter-motor-model-system"
-            name="gz::sim::systems::MulticopterMotorModel">
+      name="gz::sim::systems::MulticopterMotorModel">
       <jointName>rotor_${rotor_id}_joint</jointName>
       <linkName>rotor_${rotor_id}</linkName>
       <turningDirection>${direction}</turningDirection>

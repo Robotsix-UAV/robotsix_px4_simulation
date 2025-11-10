@@ -21,12 +21,12 @@ action interfaces and provides command-line tools.
 
 ## Compatibility
 
-For PX4 v1.14.x, the package is compatible with Ubuntu 22.04, ROS2 Humble, and Gazebo Garden.
+This package supports PX4 v1.15.x (v1.15.1, v1.15.2, v1.15.3, v1.15.4) and is compatible with:
+- Ubuntu 24.04
+- ROS2 Jazzy (recommended)
+- Gazebo Harmonic
 
-- PX4 v1.14 SITL compilation fails on Ubuntu 24.04 with default installation.
-- PX4 v1.14 SITL fails to detect Gazebo Harmonic (gz-bridge is not compiled).
-
-Those compatibility issues may be fixed with a few efforts. Contributions are welcome!
+> **Note:** For PX4 v1.14.x support, please use the v1.14 branch.
 
 ## Installation
 
@@ -60,11 +60,11 @@ You can customize the build with the following options:
 
 ```bash
 # Example: Build with custom options
-colcon build --packages-select robotsix_px4_simulation --cmake-args -DPX4_VERSION=v1.14.3 -DSKIP_MICRODDS_INSTALL=ON
+colcon build --packages-select robotsix_px4_simulation --cmake-args -DPX4_VERSION=v1.15.3 -DSKIP_MICRODDS_INSTALL=ON
 ```
 
 Available options:
-- `-DPX4_VERSION=<version>`: Select PX4 version (v1.14.0, v1.14.1, v1.14.2, v1.14.3, v1.14.4)
+- `-DPX4_VERSION=<version>`: Select PX4 version (v1.15.1, v1.15.2, v1.15.3, v1.15.4)
 - `-DSKIP_PX4_INSTALL=ON`: Skip PX4 Autopilot download and build
 - `-DSKIP_MICRODDS_INSTALL=ON`: Skip MicroXRCE-DDS Agent download and build
 
@@ -202,8 +202,8 @@ config/dds_topics/default.yaml
 ## Docker
 
 A Docker setup is provided for easy deployment. The Docker image includes:
-- ROS2 Humble
-- Gazebo Garden
+- ROS2 Jazzy
+- Gazebo Harmonic
 - Pre-built ROS2 workspace with robotsix_px4_simulation and robotsix_px4_sim_interface packages
 - Support for custom models, worlds, and PX4 parameters through volume mounts
 
@@ -245,17 +245,11 @@ docker build -t robotsix/px4_simulation .
 ```
 
 ## TODO
-- Add support for PX4 v1.15.x
 - Parameter generation
   - Automatic generation of PX4 parameters for quadcopters
   - Match parameters with those used by xacro files
 - Simulation speed control
-  - Preliminary tests shows that simulation faster than real-time is not stable with v1.14
   - Add parameters for faster/slower than real-time simulation
   - Ensure stability at different simulation speeds
-- Fix compatibility issues for v1.14.x
-  - Fix compatibility issues with Ubuntu 24.04
-  - Fix compatibility issues with Gazebo Harmonic (issue opened here: https://github.com/PX4/PX4-Autopilot/issues/24931)
-- Check of existing PX4 parameter numbers to avoid conflicts
 - Add the keyword WORLD in the model directory to allow spawning models from the .sdf world file instead of
   the model directory

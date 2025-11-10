@@ -254,7 +254,7 @@ private:
   /**
    * @brief Waits for drone ROS2 topics to become available
    *
-   * Checks for the presence of /drone_name/fmu/out/timesync_status topics
+   * Checks for the presence of /drone_name/fmu/out/vehicle_odometry topics
    * for each drone to confirm PX4 is properly connected to ROS2.
    *
    * @param model_names List of drone model names to check

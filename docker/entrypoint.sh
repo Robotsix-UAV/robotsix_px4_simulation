@@ -2,7 +2,7 @@
 set -e
 
 # Source ROS and workspace
-source /opt/ros/humble/setup.bash
+source /opt/ros/jazzy/setup.bash
 source /root/ros2_ws/install/setup.bash
 
 # Add custom Gazebo resources (models, worlds, etc.) to Gazebo resource path if the directory is not empty

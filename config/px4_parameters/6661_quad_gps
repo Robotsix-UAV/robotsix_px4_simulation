@@ -11,7 +11,7 @@
 param set-default SIM_GZ_EN 1
 
 param set-default SENS_EN_GPSSIM 1
-param set-default SENS_EN_BAROSIM 1
+param set-default SENS_EN_BAROSIM 0
 param set-default SENS_EN_MAGSIM 1
 
 # Disable DDS timestamp synchronization (UXRCE_DDS_SYNCT 0)

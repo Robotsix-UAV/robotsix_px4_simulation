@@ -618,7 +618,7 @@ bool SimulationServer::wait_for_drone_topics(
       if (pair.second)
         continue; // Skip drones we've already found
 
-      std::string topic_name = "/" + pair.first + "/fmu/out/timesync_status";
+      std::string topic_name = "/" + pair.first + "/fmu/out/vehicle_odometry";
 
       // Check if the topic exists
       for (const auto &[name, types] : topic_names_and_types) {
