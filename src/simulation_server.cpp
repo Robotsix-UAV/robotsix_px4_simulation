@@ -54,62 +54,62 @@ SimulationServer::SimulationServer()
               hide_simulation_process_output_ ? "enabled" : "disabled");
   RCLCPP_INFO(this->get_logger(), "Headless mode: %s",
               headless_mode_ ? "enabled" : "disabled");
-  
+
   // Get package share directory
-  std::string pkg_px4_sim = 
+  std::string pkg_px4_sim =
       ament_index_cpp::get_package_share_directory("robotsix_px4_simulation");
-  
+
   // Validate PX4 build directory
   std::string px4_dir_to_check = px4_dir_param_;
   if (px4_dir_to_check.empty()) {
     px4_dir_to_check = pkg_px4_sim + "/px4_sitl_default";
   }
-  
+
   // Check PX4 directory
   std::string px4_exec_path = px4_dir_to_check + "/bin/px4";
   std::string px4_etc_path = px4_dir_to_check + "/etc";
   std::string px4_rcS_path = px4_dir_to_check + "/etc/init.d-posix/rcS";
-  
-  if (std::filesystem::exists(px4_exec_path) && 
-      (std::filesystem::status(px4_exec_path).permissions() & 
+
+  if (std::filesystem::exists(px4_exec_path) &&
+      (std::filesystem::status(px4_exec_path).permissions() &
        std::filesystem::perms::owner_exec) != std::filesystem::perms::none &&
       std::filesystem::exists(px4_etc_path) &&
       std::filesystem::exists(px4_rcS_path)) {
     px4_dir_ = px4_dir_to_check;
-    RCLCPP_INFO(this->get_logger(), "%s PX4 build directory found at: %s", 
-                px4_dir_param_.empty() ? "Default" : "Custom", 
+    RCLCPP_INFO(this->get_logger(), "%s PX4 build directory found at: %s",
+                px4_dir_param_.empty() ? "Default" : "Custom",
                 px4_dir_.c_str());
-    RCLCPP_INFO(this->get_logger(), "PX4 executable found at: %s", 
+    RCLCPP_INFO(this->get_logger(), "PX4 executable found at: %s",
                 px4_exec_path.c_str());
   } else {
-    RCLCPP_ERROR(this->get_logger(), 
-                "%s PX4 build directory not valid at: %s", 
-                px4_dir_param_.empty() ? "Default" : "Custom",
-                px4_dir_to_check.c_str());
-    RCLCPP_ERROR(this->get_logger(), 
-                "PX4 build directory must contain bin/px4 executable and etc/init.d-posix/rcS script");
+    RCLCPP_ERROR(this->get_logger(), "%s PX4 build directory not valid at: %s",
+                 px4_dir_param_.empty() ? "Default" : "Custom",
+                 px4_dir_to_check.c_str());
+    RCLCPP_ERROR(this->get_logger(),
+                 "PX4 build directory must contain bin/px4 executable and "
+                 "etc/init.d-posix/rcS script");
     throw std::runtime_error("PX4 build directory not valid");
   }
-  
+
   // Validate MicroXRCE-DDS Agent executable path
   std::string xrce_agent_to_check = xrce_agent_path_param_;
   if (xrce_agent_to_check.empty()) {
     xrce_agent_to_check = pkg_px4_sim + "/bin/MicroXRCEAgent";
   }
-  
+
   // Check MicroXRCE-DDS Agent
-  if (std::filesystem::exists(xrce_agent_to_check) && 
-      (std::filesystem::status(xrce_agent_to_check).permissions() & 
+  if (std::filesystem::exists(xrce_agent_to_check) &&
+      (std::filesystem::status(xrce_agent_to_check).permissions() &
        std::filesystem::perms::owner_exec) != std::filesystem::perms::none) {
     xrce_agent_path_ = xrce_agent_to_check;
-    RCLCPP_INFO(this->get_logger(), "Using %s MicroXRCE-DDS Agent: %s", 
+    RCLCPP_INFO(this->get_logger(), "Using %s MicroXRCE-DDS Agent: %s",
                 xrce_agent_path_param_.empty() ? "default" : "custom",
                 xrce_agent_path_.c_str());
   } else {
-    RCLCPP_ERROR(this->get_logger(), 
-                "%s MicroXRCE-DDS Agent not found or not executable at: %s", 
-                xrce_agent_path_param_.empty() ? "Default" : "Custom",
-                xrce_agent_to_check.c_str());
+    RCLCPP_ERROR(this->get_logger(),
+                 "%s MicroXRCE-DDS Agent not found or not executable at: %s",
+                 xrce_agent_path_param_.empty() ? "Default" : "Custom",
+                 xrce_agent_to_check.c_str());
     throw std::runtime_error("MicroXRCE-DDS Agent not found or not executable");
   }
 
@@ -274,7 +274,8 @@ void SimulationServer::execute_start(
     }
 
     // 4. PX4 directory was already validated during initialization
-    RCLCPP_INFO(this->get_logger(), "Using PX4 build directory: %s", px4_dir_.c_str());
+    RCLCPP_INFO(this->get_logger(), "Using PX4 build directory: %s",
+                px4_dir_.c_str());
     std::string px4_exec_path = px4_dir_ + "/bin/px4";
 
     // 5. Launch PX4 for each model
@@ -288,13 +289,9 @@ void SimulationServer::execute_start(
 
       // Launch PX4
       std::vector<std::string> px4_args = {
-          px4_dir_ + "/etc",
-          "-s",
-          px4_dir_ + "/etc/init.d-posix/rcS",
-          "-w",
-          px4_dir_,
-          "-i",
-          std::to_string(instance_id)}; // Use integer instance ID
+          px4_dir_ + "/etc", "-s", px4_dir_ + "/etc/init.d-posix/rcS", "-w",
+          px4_dir_,          "-i", std::to_string(instance_id)}; // Use integer
+                                                                 // instance ID
       pid_t px4_pid = launch_process(px4_exec_path, px4_args,
                                      "PX4 for " + model_info.model_name);
       if (px4_pid < 0) {
@@ -311,7 +308,8 @@ void SimulationServer::execute_start(
 
     // 6. Launch MicroXRCEAgent
     // MicroXRCE-DDS Agent path was already validated during initialization
-    RCLCPP_INFO(this->get_logger(), "Using MicroXRCE-DDS Agent: %s", xrce_agent_path_.c_str());
+    RCLCPP_INFO(this->get_logger(), "Using MicroXRCE-DDS Agent: %s",
+                xrce_agent_path_.c_str());
     std::vector<std::string> agent_args = {"udp4", "-p", "8888"};
     xrce_agent_pid_ =
         launch_process(xrce_agent_path_, agent_args, "MicroXRCEAgent");
@@ -618,7 +616,7 @@ bool SimulationServer::wait_for_drone_topics(
       if (pair.second)
         continue; // Skip drones we've already found
 
-      std::string topic_name = "/" + pair.first + "/fmu/out/timesync_status";
+      std::string topic_name = "/" + pair.first + "/fmu/out/vehicle_odometry";
 
       // Check if the topic exists
       for (const auto &[name, types] : topic_names_and_types) {

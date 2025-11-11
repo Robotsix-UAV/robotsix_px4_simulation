@@ -24,7 +24,7 @@ RUN apt-get update && \
 	rm -rf /var/lib/apt/lists/*
 # Build the workspace
 RUN . /opt/ros/humble/setup.sh && \
-	colcon build && \
+	colcon build --event-handlers=console_direct+ && \
 	apt-get clean && \
 	rm -rf /var/lib/apt/lists/*
 
