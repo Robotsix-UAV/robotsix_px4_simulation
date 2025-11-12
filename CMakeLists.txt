@@ -39,9 +39,9 @@ option(SKIP_MICRODDS_INSTALL "Skip MicroXRCE-DDS Agent download and build" OFF)
 
 if(NOT SKIP_PX4_INSTALL)
   if(NOT DEFINED PX4_VERSION)
-    set(PX4_VERSION "v1.15.4")
+    set(PX4_VERSION "v1.16.0")
   endif()
-  set(ALLOWED_PX4_VERSIONS "v1.15.1;v1.15.2;v1.15.3;v1.15.4")
+  set(ALLOWED_PX4_VERSIONS "v1.15.1;v1.15.2;v1.15.3;v1.15.4;v1.16.0")
   list(FIND ALLOWED_PX4_VERSIONS "${PX4_VERSION}" VERSION_INDEX)
   if(VERSION_INDEX EQUAL -1)
     message(FATAL_ERROR "Invalid PX4 version: ${PX4_VERSION}. Allowed versions: ${ALLOWED_PX4_VERSIONS}")
@@ -71,7 +71,7 @@ if(NOT SKIP_PX4_INSTALL)
   add_custom_target(px4_venv
     COMMAND python3 -m venv ${PX4_AUTOPILOT_DIR}/px4_venv
     COMMAND ${PX4_AUTOPILOT_DIR}/px4_venv/bin/pip install --upgrade pip
-    COMMAND ${PX4_AUTOPILOT_DIR}/px4_venv/bin/pip install --upgrade setuptools wheel twine check-wheel-contents matplotlib numpy pyyaml pyros-genmsg lark kconfiglib future symforce jsonschema
+    COMMAND ${PX4_AUTOPILOT_DIR}/px4_venv/bin/pip install --upgrade setuptools wheel twine check-wheel-contents matplotlib numpy pyyaml pyros-genmsg lark kconfiglib future symforce jsonschema opencv-python
     COMMAND ${PX4_AUTOPILOT_DIR}/px4_venv/bin/pip install empy==3.3.4
     DEPENDS px4_download
     COMMENT "Setting up Python virtual environment for PX4 build"

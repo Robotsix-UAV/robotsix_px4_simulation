@@ -21,9 +21,9 @@ action interfaces and provides command-line tools.
 
 ## Compatibility
 
-This package supports PX4 v1.15.x (v1.15.1, v1.15.2, v1.15.3, v1.15.4) and is compatible with:
+This package supports PX4 v1.15.x and v1.16.0 (v1.15.1, v1.15.2, v1.15.3, v1.15.4, v1.16.0) and is compatible with:
 - Ubuntu 24.04
-- ROS2 Jazzy (recommended)
+- ROS2 Jazzy
 - Gazebo Harmonic
 
 > **Note:** For PX4 v1.14.x support, please use the v1.14 branch.
@@ -64,7 +64,7 @@ colcon build --packages-select robotsix_px4_simulation --cmake-args -DPX4_VERSIO
 ```
 
 Available options:
-- `-DPX4_VERSION=<version>`: Select PX4 version (v1.15.1, v1.15.2, v1.15.3, v1.15.4)
+- `-DPX4_VERSION=<version>`: Select PX4 version (v1.15.1, v1.15.2, v1.15.3, v1.15.4, v1.16.0)
 - `-DSKIP_PX4_INSTALL=ON`: Skip PX4 Autopilot download and build
 - `-DSKIP_MICRODDS_INSTALL=ON`: Skip MicroXRCE-DDS Agent download and build
 
