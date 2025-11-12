@@ -71,7 +71,7 @@ if(NOT SKIP_PX4_INSTALL)
   add_custom_target(px4_venv
     COMMAND python3 -m venv ${PX4_AUTOPILOT_DIR}/px4_venv
     COMMAND ${PX4_AUTOPILOT_DIR}/px4_venv/bin/pip install --upgrade pip
-    COMMAND ${PX4_AUTOPILOT_DIR}/px4_venv/bin/pip install --upgrade setuptools wheel twine check-wheel-contents matplotlib numpy pyyaml pyros-genmsg lark kconfiglib future symforce jsonschema opencv-python
+    COMMAND ${PX4_AUTOPILOT_DIR}/px4_venv/bin/pip install --upgrade setuptools wheel twine check-wheel-contents matplotlib numpy pyyaml pyros-genmsg lark kconfiglib future symforce jsonschema
     COMMAND ${PX4_AUTOPILOT_DIR}/px4_venv/bin/pip install empy==3.3.4
     DEPENDS px4_download
     COMMENT "Setting up Python virtual environment for PX4 build"

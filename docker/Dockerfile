@@ -6,7 +6,7 @@ RUN     apt-get update && \
 	curl https://packages.osrfoundation.org/gazebo.gpg | sudo gpg --dearmor -o /usr/share/keyrings/pkgs-osrf-archive-keyring.gpg && \
 	echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/pkgs-osrf-archive-keyring.gpg] http://packages.osrfoundation.org/gazebo/ubuntu-stable $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/gazebo-stable.list > /dev/null && \
 	apt-get update && \
-	apt-get install -y gz-harmonic g++-11 \
+	apt-get install -y gz-harmonic g++-11 libopencv-dev \
 	&& apt remove -y curl \
 	&& apt-get clean \
 	&& rm -rf /var/lib/apt/lists/*
