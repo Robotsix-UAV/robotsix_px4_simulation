@@ -54,7 +54,7 @@ if(NOT SKIP_PX4_INSTALL)
     GIT_TAG            v1.14.4_timesync_backport
     GIT_SHALLOW           ON               
     GIT_SUBMODULES_RECURSE ON              
-    GIT_PROGRESS          ON               
+    GIT_PROGRESS           ON               
 
     SOURCE_DIR            ${PX4_AUTOPILOT_DIR}
 
@@ -129,6 +129,7 @@ if(NOT SKIP_MICRODDS_INSTALL)
       -DCMAKE_BUILD_TYPE=Release
       -DUAGENT_BUILD_EXECUTABLE=ON
       -DUAGENT_USE_SYSTEM_FASTDDS=ON
+      -DUAGENT_USE_SYSTEM_FASTCDR=ON
 
     INSTALL_COMMAND ""
     
