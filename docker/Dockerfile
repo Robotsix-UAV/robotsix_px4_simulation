@@ -18,10 +18,7 @@ RUN git clone https://github.com/Robotsix-UAV/robotsix_px4_simulation.git && \
 	cd robotsix_px4_simulation && \
 	git checkout ${GIT_REF} && \
 	cd .. && \
-	git clone https://github.com/Robotsix-UAV/robotsix_px4_sim_interface.git && \
-	cd robotsix_px4_sim_interface && \
-	git checkout ${GIT_REF} && \
-	cd ..
+	git clone https://github.com/Robotsix-UAV/robotsix_px4_sim_interface.git
 WORKDIR /root/ros2_ws
 # Install dependencies
 RUN apt-get update && \
