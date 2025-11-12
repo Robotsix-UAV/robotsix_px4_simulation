@@ -50,11 +50,11 @@ if(NOT SKIP_PX4_INSTALL)
 
   # Setup PX4-Autopilot
   ExternalProject_Add(px4_download
-    GIT_REPOSITORY        https://github.com/PX4/PX4-Autopilot.git
-    GIT_TAG               ${PX4_VERSION}
-    GIT_SHALLOW           ON               
+    GIT_REPOSITORY         https://github.com/PX4/PX4-Autopilot.git
+    GIT_TAG                ${PX4_VERSION}
+    GIT_SHALLOW            ON               
     GIT_SUBMODULES_RECURSE ON              
-    GIT_PROGRESS          ON               
+    GIT_PROGRESS           ON               
 
     SOURCE_DIR            ${PX4_AUTOPILOT_DIR}
 
