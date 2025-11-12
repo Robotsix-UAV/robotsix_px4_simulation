@@ -52,7 +52,6 @@ if(NOT SKIP_PX4_INSTALL)
   ExternalProject_Add(px4_download
     GIT_REPOSITORY        https://github.com/damien-robotsix/PX4-Autopilot
     GIT_TAG            v1.14.4_timesync_backport
-    GIT_SHALLOW           ON               
     GIT_SUBMODULES_RECURSE ON              
     GIT_PROGRESS           ON               
 
