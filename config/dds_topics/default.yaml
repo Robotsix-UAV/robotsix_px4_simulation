@@ -38,12 +38,6 @@ subscriptions:
   - topic: /fmu/in/vehicle_rates_setpoint
     type: px4_msgs::msg::VehicleRatesSetpoint
 
-  # Trajectory topics
-  - topic: /fmu/in/vehicle_trajectory_bezier
-    type: px4_msgs::msg::VehicleTrajectoryBezier
-  - topic: /fmu/in/vehicle_trajectory_waypoint
-    type: px4_msgs::msg::VehicleTrajectoryWaypoint
-
   # Odometry topics
   - topic: /fmu/in/vehicle_mocap_odometry
     type: px4_msgs::msg::VehicleOdometry
