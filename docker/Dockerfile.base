@@ -31,7 +31,7 @@ RUN git clone ${PX4_REPO} PX4-Autopilot && \
 WORKDIR /root
 RUN python3 -m venv python-venv && \
     . python-venv/bin/activate && \
-    pip install --upgrade pip catkin_pkg lark && \
+    pip install catkin_pkg lark && \
     pip install -r PX4-Autopilot/Tools/setup/requirements.txt
 
 # Copy DDS configuration file (should be in docker context as dds_topics.yaml)
