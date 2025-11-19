@@ -1,0 +1,45 @@
+{
+    "name": "RobotSix PX4 Simulation",
+    "build": {
+        "dockerfile": "../docker/Dockerfile.base",
+        "context": "../docker",
+        "args": {
+            "ROS_VERSION": "jazzy",
+            "PX4_REPO": "https://github.com/PX4/PX4-Autopilot.git",
+            "PX4_VERSION": "v1.16.0",
+            "MICRO_XRCE_DDS_VERSION": "v2.4.3"
+        }
+    },
+    // Configure environment variables
+    "containerEnv": {
+        "ROS_DISTRO": "jazzy",
+        "DISPLAY": "${localEnv:DISPLAY}",
+        "GZ_SIM_RESOURCE_PATH": "/root/PX4-Autopilot/Tools/simulation/gz/models"
+    },
+    // Mount the workspace directory
+    "workspaceFolder": "/workspace/src/robotsix_px4_simulation",
+    "workspaceMount": "source=${localWorkspaceFolder},target=/workspace/src/robotsix_px4_simulation,type=bind",
+    // Mount X11 socket for GUI support
+    "mounts": [
+        "source=/tmp/.X11-unix,target=/tmp/.X11-unix,type=bind",
+        "source=${localEnv:HOME}/.Xauthority,target=/root/.Xauthority,type=bind,consistency=cached"
+    ],
+    // Run arguments
+    "runArgs": [
+        "--network=host"
+    ],
+    // Features to add (VS Code extensions and tools)
+    "customizations": {
+        "vscode": {
+            "extensions": [],
+            "settings": {
+                "terminal.integrated.shell.linux": "/bin/bash",
+                "python.defaultInterpreterPath": "/root/python-venv/bin/python",
+            }
+        }
+    },
+    // Post-create command to source ROS setup
+    "postCreateCommand": "echo 'source /opt/ros/${ROS_DISTRO}/setup.bash' >> ~/.bashrc && echo 'source /root/python-venv/bin/activate' >> ~/.bashrc",
+    // Keep container running
+    "remoteUser": "root"
+}

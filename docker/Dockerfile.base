@@ -1,0 +1,63 @@
+ARG ROS_VERSION=jazzy
+FROM ros:${ROS_VERSION}-ros-base
+ARG ROS_VERSION=jazzy
+ARG GZ_VERSION=harmonic
+
+# Install dependencies
+RUN apt-get update && \
+    apt-get install -y curl python3-venv git &&\
+    curl https://packages.osrfoundation.org/gazebo.gpg | sudo gpg --dearmor -o /usr/share/keyrings/pkgs-osrf-archive-keyring.gpg && \
+    echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/pkgs-osrf-archive-keyring.gpg] http://packages.osrfoundation.org/gazebo/ubuntu-stable $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/gazebo-stable.list > /dev/null && \
+    apt-get update && \
+    apt-get install -y gz-${GZ_VERSION} g++-11 libopencv-dev \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# Build arguments for PX4 configuration
+ARG PX4_REPO=https://github.com/PX4/PX4-Autopilot.git
+ARG PX4_VERSION=v1.16.0
+
+# Build arguments for MicroXRCE-DDS Agent
+ARG MICRO_XRCE_DDS_VERSION=v2.4.3
+
+# Clone PX4 Autopilot
+WORKDIR /root
+RUN git clone ${PX4_REPO} PX4-Autopilot && \
+    cd PX4-Autopilot && \
+    git checkout ${PX4_VERSION} && \
+    git submodule update --init --recursive
+
+# Create Python virtual environment and install PX4 requirements
+WORKDIR /root
+RUN python3 -m venv python-venv && \
+    . python-venv/bin/activate && \
+    pip install --upgrade pip catkin_pkg lark && \
+    pip install -r PX4-Autopilot/Tools/setup/requirements.txt
+
+# Copy DDS configuration file (should be in docker context as dds_topics.yaml)
+# This overwrites the default PX4 DDS configuration before building
+COPY dds_topics.yaml /root/PX4-Autopilot/src/modules/uxrce_dds_client/dds_topics.yaml
+
+# Build PX4 Autopilot
+WORKDIR /root/PX4-Autopilot
+RUN . /root/python-venv/bin/activate && \
+    make px4_sitl_default
+
+# Clone and build MicroXRCE-DDS Agent
+WORKDIR /root
+RUN git clone https://github.com/eProsima/Micro-XRCE-DDS-Agent.git && \
+    cd Micro-XRCE-DDS-Agent && \
+    git checkout ${MICRO_XRCE_DDS_VERSION} && \
+    . /opt/ros/${ROS_VERSION}/setup.sh && \
+    mkdir build && cd build && \
+    cmake .. \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DUAGENT_BUILD_EXECUTABLE=ON \
+    -DUAGENT_USE_SYSTEM_FASTDDS=ON \
+    -DUAGENT_USE_SYSTEM_FASTCDR=ON && \
+    make -j$(nproc)
+
+# Clean up to reduce image size
+RUN apt-get clean && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /root

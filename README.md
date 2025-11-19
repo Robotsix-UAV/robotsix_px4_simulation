@@ -9,12 +9,11 @@ processes.
 
 The `robotsix_px4_simulation` package provides the following capabilities:
 
-- **Automatic PX4 Installation**: Clones and builds PX4-Autopilot and MicroXRCE-DDS Agent 
-  automatically during package build
 - **Action-Based Interface**: ROS2 action server interface for programmatic control of simulations
-- **Pre-Configured Models**: Ready-to-use quadcopter models with GPS or mocap sensors
-- **Process Management**: Proper handling of all simulation processes (Gazebo, PX4, 
+- **Pre-Configured Models**: Ready-to-use quadcopter models with GPS or mocap sensors (defined in xacro format)
+- **Process Management**: Proper handling of all simulation processes (Gazebo, PX4,
   MicroXRCE-DDS Agent)
+- **Flexible Deployment**: Docker support for easy deployment with pre-built PX4 and MicroXRCE-DDS Agent
 
 This package works in tandem with the `robotsix_px4_sim_interface` package, which defines the 
 action interfaces and provides command-line tools.
@@ -52,23 +51,7 @@ cd ~/ros2_ws
 colcon build --packages-select robotsix_px4_sim_interface robotsix_px4_simulation
 ```
 
-Since the package automatically clones and builds the PX4-Autopilot repository, it may take a while.
-
-#### Build Options
-
-You can customize the build with the following options:
-
-```bash
-# Example: Build with custom options
-colcon build --packages-select robotsix_px4_simulation --cmake-args -DPX4_VERSION=v1.15.3 -DSKIP_MICRODDS_INSTALL=ON
-```
-
-Available options:
-- `-DPX4_VERSION=<version>`: Select PX4 version (v1.15.1, v1.15.2, v1.15.3, v1.15.4, v1.16.0)
-- `-DSKIP_PX4_INSTALL=ON`: Skip PX4 Autopilot download and build
-- `-DSKIP_MICRODDS_INSTALL=ON`: Skip MicroXRCE-DDS Agent download and build
-
-> **Note:** When skipping PX4 installation, you'll need to provide paths to your custom PX4 installation when launching the simulation server. PX4 models and parameter files won't be automatically installed.
+> **Note:** This package does NOT automatically install PX4-Autopilot or MicroXRCE-DDS Agent. You must provide paths to existing installations when launching the simulation server, or use the provided Docker images which include pre-built PX4 and MicroXRCE-DDS Agent.
 
 ### 4. Source the workspace
 
@@ -98,42 +81,32 @@ ros2 launch robotsix_px4_simulation simulation_server.launch.py headless_mode:=t
 
 #### Debugging Simulations
 
-By default, the simulation server hides the output from child processes (PX4, Gazebo, etc.) to keep
-the console clean. If you're experiencing issues with simulation launching or running, you can enable
-subprocess output for debugging:
+By default, the simulation server shows the output from child processes (PX4, Gazebo, etc.). If you want to hide this output to keep the console clean, you can disable it:
 
 ```bash
-# Launch with subprocess output visible for debugging
-ros2 launch robotsix_px4_simulation simulation_server.launch.py hide_simulation_process_output:=false
+# Launch with subprocess output hidden
+ros2 launch robotsix_px4_simulation simulation_server.launch.py hide_simulation_process_output:=true
 ```
-
-This will show all output from PX4, Gazebo, and other child processes, which can be helpful for
-diagnosing simulation problems.
 
 #### Custom PX4 Parameters
 
-To provide a custom PX4 parameter file, you can either add it to the `px4_parameters` folder in the
-package and build the package, or specify a custom folder containing your parameter files when
-launching the simulation server:
+To provide custom PX4 parameter files, add them to the `config/px4_parameters` folder in the
+package and rebuild. The files will be automatically copied to the PX4 airframes directory at launch time.
 
-```bash
-# Launch with custom PX4 parameters folder
-ros2 launch robotsix_px4_simulation simulation_server.launch.py px4_params_folder:=/path/to/your/param_files
-```
-
-Files in the specified folder must follow the PX4 airframe naming convention: a numeric ID followed
+Files must follow the PX4 airframe naming convention: a numeric ID followed
 by an underscore and descriptive name (e.g., `6661_quad_gps`, `6662_quad_mocap`). The numeric prefix
-identifies the airframe type and is required by PX4. These files will be copied to the PX4 airframes
-directory at launch time.
+identifies the airframe type and is required by PX4.
+
+The package includes two pre-configured parameter files:
+- `6661_quad_gps`: Quadcopter with GPS configuration
+- `6662_quad_mocap`: Quadcopter with mocap configuration
 
 #### Custom PX4 and MicroXRCE-DDS Agent Executables
 
-If you've built PX4 or MicroXRCE-DDS Agent separately (or skipped their installation during the package build),
-you can provide custom paths.
+You must provide paths to your PX4 and MicroXRCE-DDS Agent installations when launching the simulation server:
 
-- To specify a custom PX4 build directory, use the `px4_dir` argument. It should point to the `px4_sitl_default` 
-  directory or equivalent.
-- To specify a custom MicroXRCE-DDS Agent executable, use the `xrce_agent_path` argument.
+- `px4_dir`: Path to PX4 build directory (should point to the `px4_sitl_default` directory or equivalent)
+- `xrce_agent_path`: Path to MicroXRCE-DDS Agent executable
 
 ```bash
 # Launch with custom PX4 build directory
@@ -148,7 +121,11 @@ ros2 launch robotsix_px4_simulation simulation_server.launch.py \
   xrce_agent_path:=/path/to/your/MicroXRCEAgent
 ```
 
-This is particularly useful when you've built the package with `SKIP_PX4_INSTALL=ON` or `SKIP_MICRODDS_INSTALL=ON`.
+The default paths are:
+- `px4_dir`: `/root/PX4-Autopilot/build/px4_sitl_default/`
+- `xrce_agent_path`: `/root/Micro-XRCE-DDS-Agent/build/MicroXRCEAgent`
+
+These defaults match the Docker base image configuration.
 
 ### Using the Simulation Interface
 
@@ -157,21 +134,20 @@ Please refer to robotsix_px4_sim_interface/README for more details on the action
 
 ### Models and Worlds
 
-Any model or world in the 'GZ_SIM_RESOURCE_PATH' can be used in the simulation. The server supports
-parsing of xacro model files (as in the provided models).
+Any model or world in the `GZ_SIM_RESOURCE_PATH` can be used in the simulation. The server supports
+xacro model files which are processed during package installation.
 
-The package includes pre-configured generic drone models:
+The package includes pre-configured generic drone models (defined as xacro files):
 
 - **quad_gps**: Quadcopter with GPS for outdoor use
 - **quad_mocap**: Quadcopter with mocap markers for indoor use
 
-The models and worlds provided in this package are included in the GZ_SIM_RESOURCE_PATH when the
+The models and worlds provided in this package are automatically included in the `GZ_SIM_RESOURCE_PATH` when the
 package is sourced. To provide your own models or worlds, you can either:
-- Place them in the `robotsix_px4_simulation/models` or `robotsix_px4_simulation/worlds` directories
+- Place them in the source `models/` or `worlds/` directories and rebuild the package
 - Add the path to your models or worlds to the `GZ_SIM_RESOURCE_PATH` environment variable
 
-Note: If you provide a custom model, you would probably also need to provide a custom PX4 parameter
-file. The package does not automatically generate PX4 parameters for custom models.
+> **Note:** Model files in `.xacro` format are automatically processed to `.sdf` during package installation. If you provide a custom model, you'll also need to provide a corresponding PX4 parameter file.
 
 To use a model in the simulation, you can specify its directory and name in the action goal. For
 example, to start a simulation with the `quad_gps` model:
@@ -192,57 +168,135 @@ ros2 action send_goal /start_simulation robotsix_px4_sim_interface/action/StartS
   model_name: 'x500', px4_parameters: 4001, x: 0.0, y: 0.0, z: 0.0}]}"
 ```
 
-> **Note:** The PX4 models are not available if the package is built with the `SKIP_PX4_INSTALL=ON` option.
 
 ### DDS Topics
 
-To configure which PX4 topics are published over DDS, edit the configuration file 
-config/dds_topics/default.yaml
+To configure which PX4 topics are published over DDS:
+
+1. Create a DDS configuration YAML file (see PX4 documentation for format)
+2. For Docker deployments: Place it at `docker/dds_topics.yaml` (this file is copied to the base image during Docker build)
+3. For local deployments: Configure PX4's DDS settings according to PX4 documentation
+
+> **Note:** The package source does not include a default DDS topics configuration file in `config/dds_topics/`. The Docker setup uses `docker/dds_topics.yaml`.
 
 ## Docker
 
-A Docker setup is provided for easy deployment. The Docker image includes:
-- ROS2 Jazzy
-- Gazebo Harmonic
-- Pre-built ROS2 workspace with robotsix_px4_simulation and robotsix_px4_sim_interface packages
-- Support for custom models, worlds, and PX4 parameters through volume mounts
+A two-stage Docker setup is provided for flexible deployment:
 
-### Running the Docker container
+1. **Base Image** (`Dockerfile.base`): Contains ROS2, Gazebo, PX4 Autopilot, and MicroXRCE-DDS Agent
+2. **Deployment Image** (`Dockerfile`): Adds the robotsix_px4_simulation and robotsix_px4_sim_interface packages
 
-```bash
-# Basic usage - starts the simulation server in headless mode
-docker run --network=host robotsix/px4_simulation
+### Prerequisites
 
-# Using with custom Gazebo resources (models, worlds) and parameters
-docker run --network=host \
-  -v /path/to/your/gz_resources:/custom_gz_resources \
-  -v /path/to/your/parameters:/custom_px4_params \
-  robotsix/px4_simulation
-```
-
-#### Configuring Simulation Options
-
-You can configure simulation options through environment variables:
+Before building the Docker images, ensure you have a DDS configuration file:
 
 ```bash
-# Run with GUI (not headless) and show subprocess output
-docker run --network=host \
-  -e HIDE_OUTPUT=false \
-  robotsix/px4_simulation
+# Create or customize docker/dds_topics.yaml with your DDS topic configuration
+# See PX4 documentation for the YAML format
 ```
 
-Available environment variables:
+The `docker/dds_topics.yaml` file should already exist in the repository. You can customize it before building to configure which PX4 topics are published over DDS.
+
+### Building the Base Image
+
+The base image includes:
+- ROS2 Jazzy and Gazebo Harmonic
+- PX4 Autopilot (with Python virtual environment and custom DDS configuration)
+- MicroXRCE-DDS Agent (built with Release mode and system FastDDS/FastCDR)
+
+**Build Arguments:**
+- `PX4_REPO`: PX4 repository URL (default: `https://github.com/PX4/PX4-Autopilot.git`)
+- `PX4_VERSION`: PX4 version/tag (default: `v1.16.0`)
+- `MICRO_XRCE_DDS_VERSION`: MicroXRCE-DDS Agent version/tag (default: `v2.4.3`)
+
+**Build examples:**
+
+```bash
+# Default build (PX4 v1.16.0, MicroXRCE-DDS v2.4.3)
+cd docker
+docker build -f Dockerfile.base -t robotsix/px4-sim-base:latest .
+
+# Custom PX4 repository and versions
+cd docker
+docker build -f Dockerfile.base \
+  --build-arg PX4_REPO=https://github.com/your-org/PX4-Autopilot.git \
+  --build-arg PX4_VERSION=v1.15.4 \
+  --build-arg MICRO_XRCE_DDS_VERSION=v2.4.2 \
+  -t robotsix/px4-sim-base:custom .
+```
+
+### Building the Deployment Image
+
+The deployment image adds the ROS2 packages and uses PX4/MicroXRCE-DDS from the base image.
+
+**Build Arguments:**
+- `BASE_IMAGE`: Base image to use (default: `robotsix/px4-sim-base:latest`)
+- `GIT_REF`: Git branch/tag for robotsix_px4_simulation (default: `main`)
+
+**Build examples:**
+
+```bash
+# Using default base image
+cd docker
+docker build -f Dockerfile -t robotsix/px4-sim:latest .
+
+# Using custom base image
+cd docker
+docker build -f Dockerfile \
+  --build-arg BASE_IMAGE=robotsix/px4-sim-base:custom \
+  --build-arg GIT_REF=develop \
+  -t robotsix/px4-sim:develop .
+```
+
+### Complete Build Example
+
+```bash
+# Step 1: Copy DDS configuration (if not already done)
+cp config/dds_topics/default.yaml docker/dds_topics.yaml
+
+# Step 2: Build base image with specific versions
+cd docker
+docker build -f Dockerfile.base \
+  --build-arg PX4_VERSION=v1.15.4 \
+  --build-arg MICRO_XRCE_DDS_VERSION=v2.4.3 \
+  -t robotsix/px4-sim-base:v1.15.4 .
+
+# Step 3: Build deployment image
+docker build -f Dockerfile \
+  --build-arg BASE_IMAGE=robotsix/px4-sim-base:v1.15.4 \
+  -t robotsix/px4-sim:latest .
+```
+
+### Running the Docker Container
+
+```bash
+# Basic usage - headless mode
+docker run --network=host robotsix/px4-sim:latest
+
+# With GUI (requires X11 permissions)
+docker run --network=host \
+  -e DISPLAY=$DISPLAY \
+  -v /tmp/.X11-unix:/tmp/.X11-unix \
+  -e HEADLESS_MODE=false \
+  robotsix/px4-sim:latest
+
+# With custom models
+docker run --network=host \
+  -v /path/to/custom/models:/custom_gz_resources \
+  robotsix/px4-sim:latest
+
+# Override PX4 or MicroXRCE-DDS paths (advanced)
+docker run --network=host \
+  -e PX4_DIR=/custom/px4/build/path \
+  -e XRCE_AGENT_PATH=/custom/agent/path \
+  robotsix/px4-sim:latest
+```
+
+**Available Environment Variables:**
 - `HEADLESS_MODE`: Set to `false` to run with Gazebo GUI (default: `true`)
 - `HIDE_OUTPUT`: Set to `false` to show simulation process output (default: `true`)
-
-Note that for the GUI to work, need to also pass appropriate X11 permissions to the Docker container.
-
-### Building the Docker image
-
-```bash
-# From the docker directory
-docker build -t robotsix/px4_simulation .
-```
+- `PX4_DIR`: Path to PX4 build directory (default: `/root/PX4-Autopilot/build/px4_sitl_default`)
+- `XRCE_AGENT_PATH`: Path to MicroXRCEAgent executable (default: `/root/Micro-XRCE-DDS-Agent/build/MicroXRCEAgent`)
 
 ## TODO
 - Parameter generation

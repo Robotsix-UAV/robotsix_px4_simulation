@@ -1,4 +1,0 @@
-ament_prepend_unique_value GZ_SIM_RESOURCE_PATH "${COLCON_CURRENT_PREFIX}/share/"
-ament_prepend_unique_value SDF_PATH "${COLCON_CURRENT_PREFIX}/share/"
-# PX4 models won't work if not included as base path
-ament_prepend_unique_value GZ_SIM_RESOURCE_PATH "${COLCON_CURRENT_PREFIX}/share/robotsix_px4_simulation/px4_models"

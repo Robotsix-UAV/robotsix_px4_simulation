@@ -14,8 +14,6 @@ publications:
     type: px4_msgs::msg::VehicleStatus
   - topic: /fmu/out/vehicle_control_mode
     type: px4_msgs::msg::VehicleControlMode
-  - topic: /fmu/out/timesync_status
-    type: px4_msgs::msg::TimesyncStatus
 
   # Position estimation topics
   - topic: /fmu/out/vehicle_global_position
