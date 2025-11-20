@@ -17,17 +17,24 @@ from tempfile import NamedTemporaryFile
 import xacro
 
 
-def process_model_file(path):
-    """Process xacro if the input is .xacro, otherwise return path as-is."""
-    if path.endswith(".xacro"):
-        doc = xacro.process_file(path)
+def process_model_dir(model_dir):
+    """
+    Process model directory to generate SDF if needed.
+    If model.sdf.xacro exists, generate model.sdf in the same directory.
+    Returns the model directory path for Gazebo.
+    """
+    xacro_file = os.path.join(model_dir, 'model.sdf.xacro')
+    sdf_file = os.path.join(model_dir, 'model.sdf')
+    
+    # If xacro file exists, process it to generate model.sdf
+    if os.path.exists(xacro_file):
+        doc = xacro.process_file(xacro_file)
         xml = doc.toprettyxml(indent='  ')
-        tmp = NamedTemporaryFile(delete=False, suffix=".sdf")
-        with open(tmp.name, "w") as f:
+        with open(sdf_file, 'w') as f:
             f.write(xml)
-        return tmp.name
-    else:
-        return path
+    
+    # Return the model directory for Gazebo
+    return
 
 
 def launch_simulation(context):
@@ -112,9 +119,9 @@ def launch_simulation(context):
     # 2. Spawn models
     
     for idx, model in enumerate(models):
-        # Get model SDF file path and process xacro if needed
+        # Process model directory (generate SDF from xacro if needed)
         model_dir = model['model_dir']
-        sdf_file = process_model_file(model_dir)
+        process_model_dir(model_dir)
         
         # Position offset for each model
         x = model.get('x', 0.0)
@@ -124,7 +131,7 @@ def launch_simulation(context):
         # Build spawn command using ros_gz_sim create
         spawn_cmd = [
             'ros2', 'run', 'ros_gz_sim', 'create',
-            '-file', sdf_file,
+            '-file', model_dir,
             '-name', model['model_name'],
             '-x', str(x),
             '-y', str(y),
