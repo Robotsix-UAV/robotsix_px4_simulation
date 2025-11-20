@@ -7,8 +7,6 @@
   <maintainer email="six.damien@robotsix.net">Damien Six</maintainer>
   <license>Apache-2.0</license>
 
-  <buildtool_depend>setuptools</buildtool_depend>
-
   <depend>robotsix_px4_sim_interface</depend>
   <depend>xacro</depend>
   <depend>rclpy</depend>
