@@ -17,7 +17,6 @@ RUN apt-get update && \
 
 # Build the workspace
 RUN . /opt/ros/${ROS_DISTRO}/setup.sh && \
-	export CXX=g++-11 && \
 	colcon build --event-handlers=console_direct+ && \
 	apt-get clean && \
 	rm -rf /var/lib/apt/lists/*

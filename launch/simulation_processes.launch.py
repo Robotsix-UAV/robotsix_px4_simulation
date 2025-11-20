@@ -13,6 +13,21 @@ from launch_ros.actions import Node
 from ament_index_python.packages import get_package_share_directory
 import os
 import json
+from tempfile import NamedTemporaryFile
+import xacro
+
+
+def process_model_file(path):
+    """Process xacro if the input is .xacro, otherwise return path as-is."""
+    if path.endswith(".xacro"):
+        doc = xacro.process_file(path)
+        xml = doc.toprettyxml(indent='  ')
+        tmp = NamedTemporaryFile(delete=False, suffix=".sdf")
+        with open(tmp.name, "w") as f:
+            f.write(xml)
+        return tmp.name
+    else:
+        return path
 
 
 def launch_simulation(context):
@@ -97,8 +112,9 @@ def launch_simulation(context):
     # 2. Spawn models
     
     for idx, model in enumerate(models):
-        # Get model SDF file path (processed xacro -> sdf)
+        # Get model SDF file path and process xacro if needed
         model_dir = model['model_dir']
+        sdf_file = process_model_file(model_dir)
         
         # Position offset for each model
         x = model.get('x', 0.0)
@@ -108,7 +124,7 @@ def launch_simulation(context):
         # Build spawn command using ros_gz_sim create
         spawn_cmd = [
             'ros2', 'run', 'ros_gz_sim', 'create',
-            '-file', model_dir,
+            '-file', sdf_file,
             '-name', model['model_name'],
             '-x', str(x),
             '-y', str(y),

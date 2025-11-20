@@ -5,12 +5,6 @@ set -e
 source /opt/ros/${ROS_DISTRO}/setup.bash
 source /root/ros2_ws/install/setup.bash
 
-# Add custom Gazebo resources (models, worlds, etc.) to Gazebo resource path if the directory is not empty
-if [ -d "/custom_gz_resources" ] && [ "$(ls -A /custom_gz_resources)" ]; then
-  echo "Custom Gazebo resources directory found. Adding to GZ_SIM_RESOURCE_PATH."
-  export GZ_SIM_RESOURCE_PATH=$GZ_SIM_RESOURCE_PATH:/custom_gz_resources
-fi
-
 # Start the simulation server with provided arguments
 if [ "$1" = "sim" ]; then
   # Set default values if environment variables are not provided
