@@ -27,7 +27,7 @@ jobs:
             gz_version: garden
             px4_version: v1.15.4
             px4_repo: https://github.com/PX4/PX4-Autopilot.git
-            microxrce_version: v2.4.3
+            microxrce_version: v2.4.2
             tag_suffix: humble-garden-px4-1.15.4
           - ros_version: jazzy
             gz_version: harmonic
