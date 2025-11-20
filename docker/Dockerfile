@@ -4,7 +4,6 @@ FROM ${BASE_IMAGE}
 # Get the packages from the repository
 WORKDIR /root/ros2_ws/src
 RUN git clone https://github.com/Robotsix-UAV/robotsix_px4_simulation.git && \
-	cd .. && \
 	git clone https://github.com/Robotsix-UAV/robotsix_px4_sim_interface.git
 
 WORKDIR /root/ros2_ws
