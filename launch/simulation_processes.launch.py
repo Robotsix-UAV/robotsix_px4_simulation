@@ -14,28 +14,6 @@ from ament_index_python.packages import get_package_share_directory
 import os
 import json
 from tempfile import NamedTemporaryFile
-import xacro
-
-
-def process_model_dir(model_dir):
-    """
-    Process model directory to generate SDF if needed.
-    If model.sdf.xacro exists, generate model.sdf in the same directory.
-    Returns the model directory path for Gazebo.
-    """
-    xacro_file = os.path.join(model_dir, 'model.sdf.xacro')
-    sdf_file = os.path.join(model_dir, 'model.sdf')
-    
-    # If xacro file exists, process it to generate model.sdf
-    if os.path.exists(xacro_file):
-        doc = xacro.process_file(xacro_file)
-        xml = doc.toprettyxml(indent='  ')
-        with open(sdf_file, 'w') as f:
-            f.write(xml)
-        print(f"Generated SDF from Xacro: {sdf_file}")
-    
-    # Return the model directory for Gazebo
-    return
 
 
 def launch_simulation(context):
@@ -120,9 +98,8 @@ def launch_simulation(context):
     # 2. Spawn models
     
     for idx, model in enumerate(models):
-        # Process model directory (generate SDF from xacro if needed)
+        # Get model directory
         model_dir = model['model_dir']
-        process_model_dir(model_dir)
         
         # Position offset for each model
         x = model.get('x', 0.0)

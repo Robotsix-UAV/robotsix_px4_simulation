@@ -24,6 +24,8 @@ from launch.actions import IncludeLaunchDescription, Shutdown
 import launch
 from ament_index_python.packages import get_package_share_directory
 import os
+import xacro
+import glob
 
 
 class Ros2LaunchParent:
@@ -69,8 +71,48 @@ class Ros2LaunchParent:
 
 
 class SimulationServer(Node):
+    def process_model_xacro(self, model_dir):
+        """
+        Process model directory to generate SDF if needed.
+        If model.sdf.xacro exists, generate model.sdf in the same directory.
+        """
+        xacro_file = os.path.join(model_dir, 'model.sdf.xacro')
+        sdf_file = os.path.join(model_dir, 'model.sdf')
+        
+        # If xacro file exists, process it to generate model.sdf
+        if os.path.exists(xacro_file):
+            try:
+                doc = xacro.process_file(xacro_file)
+                xml = doc.toprettyxml(indent='  ')
+                with open(sdf_file, 'w') as f:
+                    f.write(xml)
+                self.get_logger().info(f"Generated SDF from Xacro: {sdf_file}")
+            except Exception as e:
+                self.get_logger().error(f"Failed to process xacro {xacro_file}: {str(e)}")
+    
+    def process_all_models(self):
+        """
+        Find and process all model directories in the package at startup.
+        Looks for model.sdf.xacro files and generates model.sdf files.
+        """
+        pkg_share = get_package_share_directory('robotsix_px4_simulation')
+        models_dir = os.path.join(pkg_share, 'models')
+        
+        if not os.path.exists(models_dir):
+            self.get_logger().warn(f"Models directory not found: {models_dir}")
+            return
+        
+        # Find all subdirectories in models directory
+        for entry in os.listdir(models_dir):
+            model_dir = os.path.join(models_dir, entry)
+            if os.path.isdir(model_dir):
+                self.process_model_xacro(model_dir)
+    
     def __init__(self):
         super().__init__("simulation_server")
+        
+        # Process all models at startup
+        self.process_all_models()
         
         # Callback group for concurrent handling
         self.callback_group = ReentrantCallbackGroup()
