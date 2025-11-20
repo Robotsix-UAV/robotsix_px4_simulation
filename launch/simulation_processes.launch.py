@@ -32,6 +32,7 @@ def process_model_dir(model_dir):
         xml = doc.toprettyxml(indent='  ')
         with open(sdf_file, 'w') as f:
             f.write(xml)
+        print(f"Generated SDF from Xacro: {sdf_file}")
     
     # Return the model directory for Gazebo
     return
