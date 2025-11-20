@@ -12,8 +12,8 @@
         "DISPLAY": "${localEnv:DISPLAY}"
     },
     // Mount the workspace directory
-    "workspaceFolder": "/workspace/src/robotsix_px4_simulation",
-    "workspaceMount": "source=${localWorkspaceFolder},target=/workspace/src/robotsix_px4_simulation,type=bind",
+    "workspaceFolder": "/root/ros2_ws/src/robotsix_px4_simulation",
+    "workspaceMount": "source=${localWorkspaceFolder},target=/root/ros2_ws/src/robotsix_px4_simulation,type=bind",
     // Mount X11 socket for GUI support
     "mounts": [
         "source=/tmp/.X11-unix,target=/tmp/.X11-unix,type=bind",

@@ -23,7 +23,6 @@ if [ "$1" = "sim" ]; then
   
   exec ros2 launch robotsix_px4_simulation simulation_server.launch.py \
     headless_mode:=${HEADLESS_MODE} \
-    px4_params_folder:=/custom_px4_params \
     hide_simulation_process_output:=${HIDE_OUTPUT} \
     px4_dir:=${PX4_DIR} \
     xrce_agent_path:=${XRCE_AGENT_PATH}
