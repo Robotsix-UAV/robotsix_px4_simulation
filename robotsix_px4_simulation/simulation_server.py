@@ -209,6 +209,10 @@ class SimulationServer(Node):
             else:
                 result.message = "Failed to stop simulation"
                 goal_handle.abort()
+        except Exception as e:
+            self.get_logger().error(f"Error stopping simulation: {str(e)}")
+            result.message = str(e)
+            goal_handle.abort()
         
         return result
     
