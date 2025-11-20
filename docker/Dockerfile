@@ -6,7 +6,7 @@ WORKDIR /root/ros2_ws/src
 RUN git clone https://github.com/Robotsix-UAV/robotsix_px4_simulation.git && \
 	git clone https://github.com/Robotsix-UAV/robotsix_px4_sim_interface.git
 
-# Only for humble : clone https://github.com/gazebosim/ros_gz.git and checkout humble branch (necessary for Gazebo Harmonic compatibility)
+# Only for humble : clone https://github.com/gazebosim/ros_gz.git and checkout humble branch (necessary for Gazebo compatibility)
 RUN if [ "$ROS_DISTRO" = "humble" ]; then \
 	git clone https://github.com/gazebosim/ros_gz.git && \
 	cd ros_gz && \
