@@ -2,6 +2,7 @@ ARG ROS_VERSION=jazzy
 FROM ros:${ROS_VERSION}-ros-base
 ARG ROS_VERSION=jazzy
 ARG GZ_VERSION=harmonic
+ENV GZ_VERSION=${GZ_VERSION}
 
 # Install dependencies
 RUN apt-get update && \
