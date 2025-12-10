@@ -18,7 +18,7 @@ WORKDIR /root/ros2_ws
 # Install dependencies
 RUN apt-get update && \
 	rosdep update && \
-	rosdep install -y --from-paths src --ignore-src && \
+	rosdep install -y --from-paths src --ignore-src || true && \
 	apt-get clean && \
 	rm -rf /var/lib/apt/lists/*
 
