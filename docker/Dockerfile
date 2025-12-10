@@ -19,6 +19,7 @@ WORKDIR /root/ros2_ws
 RUN apt-get update && \
 	rosdep update && \
 	rosdep install -y --from-paths src --ignore-src || true && \
+	apt install -y libgflags-dev  && \
 	apt-get clean && \
 	rm -rf /var/lib/apt/lists/*
 
