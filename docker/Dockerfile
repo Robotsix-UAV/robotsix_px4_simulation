@@ -18,8 +18,7 @@ WORKDIR /root/ros2_ws
 # Install dependencies
 RUN apt-get update && \
 	rosdep update && \
-	rosdep install -y --from-paths src --ignore-src || true && \
-	apt install -y libgflags-dev ros-${ROS_DISTRO}-actuator-msgs  && \
+	rosdep install -y --from-paths src --ignore-src --skip-keys="gz-transport12 gz-math7" || true && \
 	apt-get clean && \
 	rm -rf /var/lib/apt/lists/*
 
