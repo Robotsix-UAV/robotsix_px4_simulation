@@ -19,7 +19,7 @@ WORKDIR /root/ros2_ws
 RUN apt-get update && \
 	rosdep update && \
 	rosdep install -y --from-paths src --ignore-src || true && \
-	apt install -y libgflags-dev ros-humble-actuator-msgs  && \
+	apt install -y libgflags-dev ros-${ROS_DISTRO}-actuator-msgs  && \
 	apt-get clean && \
 	rm -rf /var/lib/apt/lists/*
 
