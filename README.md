@@ -3,7 +3,7 @@
 
 A ROS2 package for PX4 SITL simulation with Gazebo. This package provides an action server to 
 start and stop PX4-based simulations, and automatically manages the lifecycle of all related 
-processes.
+processes. 
 
 ## Overview
 
