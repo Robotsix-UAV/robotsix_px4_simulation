@@ -17,7 +17,9 @@
     // Mount X11 socket for GUI support
     "mounts": [
         "source=/tmp/.X11-unix,target=/tmp/.X11-unix,type=bind",
-        "source=${localEnv:HOME}/.Xauthority,target=/root/.Xauthority,type=bind,consistency=cached"
+        "source=${localEnv:HOME}/.Xauthority,target=/root/.Xauthority,type=bind,consistency=cached",
+        "source=${localEnv:HOME}${localEnv:USERPROFILE}/.ssh,target=/tmp/host-ssh,type=bind,consistency=cached,readonly",
+        "source=${localEnv:HOME}${localEnv:USERPROFILE}/.gitconfig,target=/root/.gitconfig,type=bind,consistency=cached"
     ],
     // Run arguments
     "runArgs": [
@@ -33,8 +35,8 @@
             }
         }
     },
-    // Post-create command to source ROS setup
-    "postCreateCommand": "echo 'source /opt/ros/${ROS_DISTRO}/setup.bash' >> ~/.bashrc && echo 'source /root/python-venv/bin/activate' >> ~/.bashrc",
+    // Post-create command to copy SSH keys with correct permissions and source ROS setup
+    "postCreateCommand": "bash -c 'if [ -d /tmp/host-ssh ]; then rm -rf /root/.ssh && cp -r /tmp/host-ssh /root/.ssh && chown -R root:root /root/.ssh && chmod 700 /root/.ssh && find /root/.ssh -type f -exec chmod 600 {} \\; && find /root/.ssh -type d -exec chmod 700 {} \\;; fi && echo \"source /opt/ros/${ROS_DISTRO}/setup.bash\" >> ~/.bashrc && echo \"source /root/python-venv/bin/activate\" >> ~/.bashrc'",
     // Keep container running
     "remoteUser": "root"
 }
