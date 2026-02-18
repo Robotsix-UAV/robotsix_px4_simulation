@@ -12,7 +12,8 @@ from rclpy.action import ActionServer, CancelResponse, GoalResponse
 from rclpy.executors import MultiThreadedExecutor
 from rclpy.callback_groups import ReentrantCallbackGroup
 
-from robotsix_px4_sim_interface.action import StartSimulation, StopSimulation
+from robotsix_px4_sim_interface.action import StartSimulation, StopSimulation, StartSimulationMavlink
+from robotsix_px4_sim_interface.msg import MavlinkConnectionInfo
 
 import threading
 import json
@@ -133,10 +134,12 @@ class SimulationServer(Node):
         # Launch service management
         self.launch_parent = None
         
-        # Path to simulation processes launch file
+        # Path to simulation processes launch files
         pkg_share = get_package_share_directory('robotsix_px4_simulation')
         self.launch_file = os.path.join(
             pkg_share, 'launch', 'simulation_processes.launch.py')
+        self.launch_file_mavlink = os.path.join(
+            pkg_share, 'launch', 'simulation_processes_mavlink.launch.py')
         
         # Action servers
         self.start_action_server = ActionServer(
@@ -159,6 +162,16 @@ class SimulationServer(Node):
             callback_group=self.callback_group
         )
         
+        self.start_mavlink_action_server = ActionServer(
+            self,
+            StartSimulationMavlink,
+            'start_simulation_mavlink',
+            execute_callback=self.execute_start_mavlink,
+            goal_callback=self.handle_start_mavlink_goal,
+            cancel_callback=self.handle_cancel,
+            callback_group=self.callback_group
+        )
+        
         self.get_logger().info("Simulation Server initialized")
         self.get_logger().info(f"Headless mode: {self.headless}")
         self.get_logger().info(f"PX4 directory: {self.px4_dir}")
@@ -170,6 +183,27 @@ class SimulationServer(Node):
     def handle_start_goal(self, goal_request):
         """Handle start simulation goal"""
         self.get_logger().info("Received StartSimulation goal")
+        
+        if self.is_simulation_running():
+            if goal_request.force_restart:
+                self.get_logger().info(
+                    "Simulation running - force restart requested")
+            else:
+                self.get_logger().warn(
+                    "Simulation already running. Use force_restart=true")
+                return GoalResponse.REJECT
+        
+        # Check for duplicate model names
+        model_names = [m.model_name for m in goal_request.models]
+        if len(model_names) != len(set(model_names)):
+            self.get_logger().warn("Duplicate model names detected")
+            return GoalResponse.REJECT
+        
+        return GoalResponse.ACCEPT
+    
+    def handle_start_mavlink_goal(self, goal_request):
+        """Handle start simulation mavlink goal"""
+        self.get_logger().info("Received StartSimulationMavlink goal")
         
         if self.is_simulation_running():
             if goal_request.force_restart:
@@ -258,8 +292,68 @@ class SimulationServer(Node):
         
         return result
     
-    def start_simulation(self, goal):
-        """Start simulation by launching simulation_processes.launch.py"""
+    def execute_start_mavlink(self, goal_handle):
+        """Execute start simulation mavlink action with feedback"""
+        goal = goal_handle.request
+        result = StartSimulationMavlink.Result()
+        feedback = StartSimulationMavlink.Feedback()
+        
+        # Base mavlink port (increments for each instance)
+        base_mavlink_port = 14540
+        
+        try:
+            # Handle force restart: stop existing simulation first
+            if goal.force_restart and self.is_simulation_running():
+                self.get_logger().info(
+                    "Stopping current simulation for restart...")
+                if not self.stop_simulation():
+                    result.message = "Failed to stop existing simulation"
+                    goal_handle.abort()
+                    return result
+                
+                import time
+                time.sleep(2)  # Wait for cleanup
+            
+            # Start simulation via mavlink launch file
+            self.get_logger().info("Starting simulation with Mavlink...")
+            if not self.start_simulation(goal, use_mavlink=True):
+                result.message = "Failed to start simulation"
+                goal_handle.abort()
+                return result
+            
+            # Build mavlink connection info for feedback
+            mavlink_connections = []
+            for idx, model in enumerate(goal.models):
+                mavlink_port = base_mavlink_port + idx
+                connection_info = MavlinkConnectionInfo()
+                connection_info.model_name = model.model_name
+                connection_info.connection_url = f"udp://:{mavlink_port}"
+                mavlink_connections.append(connection_info)
+            
+            # Publish feedback with mavlink connection info
+            feedback.mavlink_connections = mavlink_connections
+            goal_handle.publish_feedback(feedback)
+            
+            self.get_logger().info("Simulation started successfully with Mavlink")
+            
+            # Log connection info
+            for conn in mavlink_connections:
+                self.get_logger().info(
+                    f"Model '{conn.model_name}' - Mavlink: {conn.connection_url}")
+            
+            result.message = "Simulation started with Mavlink"
+            goal_handle.succeed()
+            
+        except Exception as e:
+            self.get_logger().error(f"Error starting simulation: {str(e)}")
+            result.message = str(e)
+            self.stop_simulation()
+            goal_handle.abort()
+
+        return result
+    
+    def start_simulation(self, goal, use_mavlink=False):
+        """Start simulation by launching simulation_processes.launch.py or mavlink variant"""
         try:
             # Convert models to JSON string for passing to launch file
             models_data = []
@@ -281,13 +375,19 @@ class SimulationServer(Node):
                 'hide_simulation_process_output':
                     'true' if self.hide_output else 'false',
                 'px4_dir': self.px4_dir,
-                'xrce_agent_path': self.xrce_agent_path,
                 'models': models_json
             }
             
+            # Add xrce_agent_path only for non-mavlink mode
+            if not use_mavlink:
+                launch_args['xrce_agent_path'] = self.xrce_agent_path
+            
+            # Select appropriate launch file
+            launch_file = self.launch_file_mavlink if use_mavlink else self.launch_file
+            
             # Create launch description
             launch_description_source = PythonLaunchDescriptionSource(
-                self.launch_file)
+                launch_file)
             
             include_launch = IncludeLaunchDescription(
                 launch_description_source,
