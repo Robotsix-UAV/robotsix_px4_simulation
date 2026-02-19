@@ -23,6 +23,10 @@ publications:
   - topic: /fmu/out/vehicle_odometry
     type: px4_msgs::msg::VehicleOdometry
 
+  # Feedback on thrust setpoint
+  - topic: /fmu/out/vehicle_thrust_setpoint
+    type: px4_msgs::msg::VehicleThrustSetpoint
+
 subscriptions:
   # Control mode topics
   - topic: /fmu/in/offboard_control_mode
