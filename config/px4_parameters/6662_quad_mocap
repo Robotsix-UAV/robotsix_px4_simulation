@@ -9,7 +9,6 @@
 . ${R}etc/init.d/rc.mc_defaults
 
 param set-default SIM_GZ_EN 1
-
 param set-default SENS_EN_GPSSIM 0
 param set-default SENS_EN_BAROSIM 0
 param set-default SENS_EN_MAGSIM 0
@@ -22,6 +21,7 @@ param set-default EKF2_MAG_TYPE 5
 # In simulation, PX4 time is already aligned with simulator time.
 # We don't want the DDS client to realign timestamps back to OS time.
 param set-default UXRCE_DDS_SYNCT 0
+param set-default UXRCE_DDS_SYNCC 0
 
 param set-default CA_AIRFRAME 0
 param set-default CA_ROTOR_COUNT 4
