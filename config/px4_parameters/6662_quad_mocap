@@ -13,8 +13,9 @@ param set-default SENS_EN_GPSSIM 0
 param set-default SENS_EN_BAROSIM 0
 param set-default SENS_EN_MAGSIM 0
 
-# No magnetometer on motion capture drone
+# No magnetometer nor gps on motion capture drone
 param set-default SYS_HAS_MAG 0
+param set-default SYS_HAS_GPS 0
 param set-default EKF2_MAG_TYPE 5
 
 # Disable DDS timestamp synchronization (UXRCE_DDS_SYNCT 0)
@@ -95,3 +96,4 @@ param set-default FD_ACT_EN 0
 param set-default FD_ESCS_EN 0
 param set-default EKF2_REQ_VDRIFT 0.5
 param set-default COM_ARM_WO_GPS 2
+param set EKF2_EV_CTRL 11

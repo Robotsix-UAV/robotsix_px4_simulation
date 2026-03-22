@@ -4,7 +4,7 @@
         "dockerfile": "../docker/Dockerfile",
         "context": "../docker",
         "args": {
-            "BASE_IMAGE": "robotsix/px4-sim-base:humble-garden-px4-1.14.4_arrc"
+            "BASE_IMAGE": "robotsix/px4-sim-base:jazzy-harmonic-px4-1.16.0"
         }
     },
     // Configure environment variables
