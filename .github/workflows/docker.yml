@@ -17,24 +17,28 @@ jobs:
             px4_repo: https://github.com/damien-robotsix/PX4-Autopilot.git
             microxrce_version: v2.4.2
             tag_suffix: humble-garden-px4-1.14.4_arrc
+            ros_domain_id: 10
           - ros_version: humble
             gz_version: garden
             px4_version: v1.14.4
             px4_repo: https://github.com/PX4/PX4-Autopilot.git
             microxrce_version: v2.4.2
             tag_suffix: humble-garden-px4-1.14.4
+            ros_domain_id: 11
           - ros_version: humble
             gz_version: garden
             px4_version: v1.15.4
             px4_repo: https://github.com/PX4/PX4-Autopilot.git
             microxrce_version: v2.4.2
             tag_suffix: humble-garden-px4-1.15.4
+            ros_domain_id: 12
           - ros_version: jazzy
             gz_version: harmonic
             px4_version: v1.16.0
             px4_repo: https://github.com/PX4/PX4-Autopilot.git
             microxrce_version: v2.4.3
             tag_suffix: jazzy-harmonic-px4-1.16.0
+            ros_domain_id: 13
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -74,6 +78,7 @@ jobs:
             PX4_VERSION=${{ matrix.px4_version }}
             PX4_REPO=${{ matrix.px4_repo }}
             MICRO_XRCE_DDS_VERSION=${{ matrix.microxrce_version }}
+            ROS_DOMAIN_ID=${{ matrix.ros_domain_id }}
 
   docker:
     needs: docker-base
