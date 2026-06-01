@@ -60,8 +60,8 @@ subscriptions:
   - topic: /fmu/in/telemetry_status
     type: px4_msgs::msg::TelemetryStatus
 
-    # Motor output
-    - topic: /fmu/out/actuator_motors
+  # Motor output
+  - topic: /fmu/out/actuator_motors
     type: px4_msgs::msg::ActuatorMotors
 
   # Manual control setpoints (to simulate joystick inputs)
