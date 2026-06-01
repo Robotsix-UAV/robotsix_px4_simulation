@@ -66,7 +66,7 @@ param set-default SIM_GZ_EC_MAX4 1000
 
 param set-default MPC_MANTHR_MIN 0.01
 param set-default MPC_THR_MIN 0.01
-param set-default MPC_THR_HOVER 0.08175
+param set-default MPC_THR_HOVER 0.4086
 
 # Use squared motor control signal
 param set-default THR_MDL_FAC 1
