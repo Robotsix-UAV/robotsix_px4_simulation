@@ -51,6 +51,8 @@ subscriptions:
     type: px4_msgs::msg::VehicleAttitudeSetpoint
   - topic: /fmu/in/vehicle_rates_setpoint
     type: px4_msgs::msg::VehicleRatesSetpoint
+  - topic: /fmu/in/actuator_motors
+    type: px4_msgs::msg::ActuatorMotors
 
   # Odometry topics
   - topic: /fmu/in/vehicle_mocap_odometry
