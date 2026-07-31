@@ -5,6 +5,15 @@ set -e
 source /opt/ros/${ROS_DISTRO}/setup.bash
 source /root/ros2_ws/install/setup.bash
 
+# All gz-transport participants (gz sim server/GUI, ros_gz_bridge, ros_gz_sim
+# create, PX4) run inside this container, so discovery only needs loopback.
+# Left unset, gz-transport auto-selects the first non-loopback interface; on
+# hosts where that interface does not loop multicast back (Wi-Fi is a common
+# case, and --network=host exposes it), discovery silently fails and the spawn
+# hangs on "Requesting list of world names". Override to reach gz-transport
+# peers outside the container.
+export GZ_IP=${GZ_IP:-127.0.0.1}
+
 # Start the simulation server with provided arguments
 if [ "$1" = "sim" ]; then
   # Set default values if environment variables are not provided
@@ -20,6 +29,7 @@ if [ "$1" = "sim" ]; then
   echo "- Hide process output: ${HIDE_OUTPUT}"
   echo "- PX4 directory: ${PX4_DIR}"
   echo "- MicroXRCE-DDS Agent path: ${XRCE_AGENT_PATH}"
+  echo "- gz-transport IP: ${GZ_IP}"
   
   exec ros2 launch robotsix_px4_simulation simulation_server.launch.py \
     headless_mode:=${HEADLESS_MODE} \
