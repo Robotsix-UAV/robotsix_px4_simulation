@@ -294,12 +294,15 @@
     </linear_acceleration>
   </xacro:macro>
 
-  <!-- Macro for a rotor -->
-  <xacro:macro name="rotor_macro" params="rotor_id pos_x pos_y direction max_motor_thrust='30.0'">
+  <!-- Macro for a rotor. Optional mount tilt: the rotor frame is rotated by yaw `azimuth`
+       then pitch `tilt` (radians), so a radial-outward tilt at a given arm azimuth is
+       azimuth=arm angle, tilt=cant angle; the thrust stays along the rotor frame z axis. -->
+  <xacro:macro name="rotor_macro"
+    params="rotor_id pos_x pos_y direction max_motor_thrust='30.0' tilt='0' azimuth='0'">
     <link name="rotor_${rotor_id}">
       <gravity>true</gravity>
       <self_collide>false</self_collide>
-      <pose>${pos_x} ${pos_y} 0.01 0 0 0</pose>
+      <pose>${pos_x} ${pos_y} 0.01 0 ${tilt} ${azimuth}</pose>
       <inertial>
         <mass>1e-9</mass>
         <inertia>

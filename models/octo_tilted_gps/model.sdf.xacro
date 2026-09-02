@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<!-- SPDX-License-Identifier: Apache-2.0 -->
+<!--
+ * Author: Damien SIX (damien@robotsix.net)
+ * Copyright: Robotsix
+ * Date: 2026
+-->
+<sdf version="1.9" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <!-- Import the tilted octorotor base -->
+  <xacro:include filename="$(find robotsix_px4_simulation)/models/common/octorotor_tilted_base.xacro"/>
+
+  <!-- Instantiate the tilted octorotor with GPS -->
+  <xacro:octorotor_tilted_base name="octo_tilted_gps">
+      <additional_sensors>
+        <sensor name="navsat_sensor" type="navsat">
+          <always_on>1</always_on>
+          <update_rate>30</update_rate>
+        </sensor>
+</additional_sensors>
+<model_plugin>
+</model_plugin>
+  </xacro:octorotor_tilted_base>
+
+</sdf>
