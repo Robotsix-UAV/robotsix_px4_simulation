@@ -36,6 +36,10 @@ setup(
             glob('models/quad_gps/*')),
         ('share/' + package_name + '/models/quad_mocap',
             glob('models/quad_mocap/*')),
+        ('share/' + package_name + '/models/hexa_tilted_gps',
+            glob('models/hexa_tilted_gps/*')),
+        ('share/' + package_name + '/models/octo_tilted_gps',
+            glob('models/octo_tilted_gps/*')),
         
         # Docker files
         ('share/' + package_name + '/docker',
