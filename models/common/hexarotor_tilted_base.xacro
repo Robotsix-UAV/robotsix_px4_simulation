@@ -1,0 +1,249 @@
+<?xml version="1.0"?>
+
+<!-- SPDX-License-Identifier: Apache-2.0 -->
+<!--
+ * Author: Damien SIX (damien@robotsix.net)
+ * Copyright: Robotsix
+ * Date: 2026
+-->
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <!-- Shared IMU and rotor macros -->
+  <xacro:include filename="$(find robotsix_px4_simulation)/models/common/quadrotor_base.xacro"/>
+
+  <!-- Macro for a hexarotor with rotors canted radially outward by `rotor_tilt` [rad] -->
+  <xacro:macro name="hexarotor_tilted_base"
+    params="name
+                                        mass='5.0'
+                                        ixx='0.15' ixy='0' ixz='0'
+                                        iyy='0.15' iyz='0'
+                                        izz='0.15'
+                                        arm_length='1.0'
+                                        arm_width='0.025'
+                                        arm_thickness='0.01'
+                                        base_radius='0.05'
+                                        base_height='0.01'
+                                        max_motor_thrust='30.0'
+                                        rotor_tilt='0.2617993877991494'
+	  			        **additional_sensors
+	  				**model_plugin">
+    <model name='${name}'>
+      <pose>0 0 0 0 0 0</pose>
+      <self_collide>false</self_collide>
+      <static>false</static>
+      <link name="base_link">
+        <inertial>
+          <mass>${mass}</mass>
+          <inertia>
+            <ixx>${ixx}</ixx>
+            <ixy>${ixy}</ixy>
+            <ixz>${ixz}</ixz>
+            <iyy>${iyy}</iyy>
+            <iyz>${iyz}</iyz>
+            <izz>${izz}</izz>
+          </inertia>
+        </inertial>
+        <gravity>true</gravity>
+        <visual name='base_link_visual'>
+          <pose>0 0 0 0 0 0</pose>
+          <geometry>
+            <cylinder>
+              <radius>${base_radius}</radius>
+              <length>${base_height}</length>
+            </cylinder>
+          </geometry>
+          <material>
+            <ambient>0 1 0 1</ambient>
+            <diffuse>0 1 0 1</diffuse>
+            <specular>0 1 0 1</specular>
+          </material>
+        </visual>
+        <collision name='base_link_collision'>
+          <pose>0 0 0 0 0 0</pose>
+          <geometry>
+            <cylinder>
+              <radius>${base_radius}</radius>
+              <length>${base_height}</length>
+            </cylinder>
+          </geometry>
+          <surface>
+            <contact>
+              <ode>
+                <min_depth>0.001</min_depth>
+                <max_vel>0</max_vel>
+              </ode>
+            </contact>
+            <friction>
+              <ode />
+            </friction>
+          </surface>
+        </collision>
+        <sensor name="imu_sensor" type="imu">
+          <always_on>1</always_on>
+          <update_rate>250</update_rate>
+          <imu>
+            <xacro:imu_noise_params />
+          </imu>
+        </sensor>
+        <sensor name="air_pressure_sensor" type="air_pressure">
+          <always_on>1</always_on>
+          <update_rate>50</update_rate>
+          <air_pressure>
+            <pressure>
+              <noise type="gaussian">
+                <mean>0</mean>
+                <stddev>0.01</stddev>
+              </noise>
+            </pressure>
+          </air_pressure>
+        </sensor>
+        <xacro:insert_block name="additional_sensors" />
+      </link>
+
+      <xacro:insert_block name="model_plugin" />
+
+      <!-- Arms -->
+      <link name="arm_0">
+        <gravity>true</gravity>
+        <self_collide>false</self_collide>
+        <pose>0 0 0 0 0 0</pose>
+        <inertial>
+          <mass>1e-9</mass>
+          <inertia>
+            <ixx>1e-9</ixx>
+            <iyy>1e-9</iyy>
+            <izz>1e-9</izz>
+          </inertia>
+        </inertial>
+        <visual name='arm_0_visual'>
+          <pose>0 0 0 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>${arm_length} ${arm_width} ${arm_thickness}</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0 1 0 1</ambient>
+            <diffuse>0 1 0 1</diffuse>
+            <specular>0 1 0 1</specular>
+          </material>
+        </visual>
+      </link>
+      <joint name='arm_0_joint' type='fixed'>
+        <child>arm_0</child>
+        <parent>base_link</parent>
+      </joint>
+
+      <link name="arm_1">
+        <gravity>true</gravity>
+        <self_collide>false</self_collide>
+        <pose>0 0 0 0 0 1.047197551196598</pose>
+        <inertial>
+          <mass>1e-9</mass>
+          <inertia>
+            <ixx>1e-9</ixx>
+            <iyy>1e-9</iyy>
+            <izz>1e-9</izz>
+          </inertia>
+        </inertial>
+        <visual name='arm_1_visual'>
+          <pose>0 0 0 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>${arm_length} ${arm_width} ${arm_thickness}</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0 1 0 1</ambient>
+            <diffuse>0 1 0 1</diffuse>
+            <specular>0 1 0 1</specular>
+          </material>
+        </visual>
+      </link>
+      <joint name='arm_1_joint' type='fixed'>
+        <child>arm_1</child>
+        <parent>base_link</parent>
+      </joint>
+
+      <link name="arm_2">
+        <gravity>true</gravity>
+        <self_collide>false</self_collide>
+        <pose>0 0 0 0 0 2.094395102393195</pose>
+        <inertial>
+          <mass>1e-9</mass>
+          <inertia>
+            <ixx>1e-9</ixx>
+            <iyy>1e-9</iyy>
+            <izz>1e-9</izz>
+          </inertia>
+        </inertial>
+        <visual name='arm_2_visual'>
+          <pose>0 0 0 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>${arm_length} ${arm_width} ${arm_thickness}</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0 1 0 1</ambient>
+            <diffuse>0 1 0 1</diffuse>
+            <specular>0 1 0 1</specular>
+          </material>
+        </visual>
+      </link>
+      <joint name='arm_2_joint' type='fixed'>
+        <child>arm_2</child>
+        <parent>base_link</parent>
+      </joint>
+
+      <!-- Rotors -->
+      <xacro:rotor_macro rotor_id="0"
+        pos_x="0.5"
+        pos_y="0"
+        direction="cw"
+        max_motor_thrust="${max_motor_thrust}"
+        tilt="${rotor_tilt}"
+        azimuth="0" />
+
+      <xacro:rotor_macro rotor_id="1"
+        pos_x="0.2500000000000001"
+        pos_y="0.4330127018922193"
+        direction="ccw"
+        max_motor_thrust="${max_motor_thrust}"
+        tilt="${rotor_tilt}"
+        azimuth="1.047197551196598" />
+
+      <xacro:rotor_macro rotor_id="2"
+        pos_x="-0.2499999999999999"
+        pos_y="0.4330127018922194"
+        direction="cw"
+        max_motor_thrust="${max_motor_thrust}"
+        tilt="${rotor_tilt}"
+        azimuth="2.094395102393195" />
+
+      <xacro:rotor_macro rotor_id="3"
+        pos_x="-0.5"
+        pos_y="6.123233995736766e-17"
+        direction="ccw"
+        max_motor_thrust="${max_motor_thrust}"
+        tilt="${rotor_tilt}"
+        azimuth="3.141592653589793" />
+
+      <xacro:rotor_macro rotor_id="4"
+        pos_x="-0.2500000000000002"
+        pos_y="-0.4330127018922192"
+        direction="cw"
+        max_motor_thrust="${max_motor_thrust}"
+        tilt="${rotor_tilt}"
+        azimuth="4.188790204786391" />
+
+      <xacro:rotor_macro rotor_id="5"
+        pos_x="0.2500000000000001"
+        pos_y="-0.4330127018922193"
+        direction="ccw"
+        max_motor_thrust="${max_motor_thrust}"
+        tilt="${rotor_tilt}"
+        azimuth="5.235987755982989" />
+    </model>
+  </xacro:macro>
+</robot>
