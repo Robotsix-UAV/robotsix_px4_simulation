@@ -29,6 +29,7 @@
 	  				accel_bias_correlation_time='300' 
                                         max_motor_thrust='30.0'
 	  			        **additional_sensors
+	  				**additional_links
 	  				**model_plugin">
     <model name='${name}'>
       <pose>0 0 0 0 0 0</pose>
@@ -108,6 +109,8 @@
         </sensor>
         <xacro:insert_block name="additional_sensors" />
       </link>
+
+      <xacro:insert_block name="additional_links" />
 
       <xacro:insert_block name="model_plugin" />
 
