@@ -1,0 +1,72 @@
+<?xml version="1.0"?>
+
+<!-- SPDX-License-Identifier: Apache-2.0 -->
+<!--
+ * Author: Damien SIX (damien@robotsix.net)
+ * Copyright: Robotsix
+ * Date: 2026
+-->
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <!-- Downward-facing laser rangefinder.
+
+       The link name (lidar_sensor_link), the sensor name (lidar) and the downward orientation are
+       what the PX4 gz bridge looks for: it subscribes to
+       /world/<world>/model/<model>/link/lidar_sensor_link/sensor/lidar/scan and publishes the range
+       as a distance_sensor uORB message, tagged ROTATION_DOWNWARD_FACING from the sensor world pose.
+       EKF2 then fuses it into the terrain estimate (vehicle_local_position dist_bottom). Renaming
+       either the link or the sensor silently disconnects the sensor from PX4. -->
+  <xacro:macro name="downward_rangefinder"
+    params="z_offset='-0.05'
+            min_range='0.1'
+            max_range='30.0'
+            update_rate='50'">
+    <joint name="lidar_sensor_joint" type="fixed">
+      <parent>base_link</parent>
+      <child>lidar_sensor_link</child>
+    </joint>
+    <link name="lidar_sensor_link">
+      <pose relative_to="base_link">0 0 ${z_offset} 0 1.57 0</pose>
+      <inertial>
+        <mass>0.001</mass>
+        <inertia>
+          <ixx>1e-5</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>1e-5</iyy>
+          <iyz>0</iyz>
+          <izz>1e-5</izz>
+        </inertia>
+      </inertial>
+      <sensor name="lidar" type="gpu_lidar">
+        <gz_frame_id>lidar_sensor_link</gz_frame_id>
+        <pose>0 0 0 3.14 0 0</pose>
+        <update_rate>${update_rate}</update_rate>
+        <ray>
+          <scan>
+            <horizontal>
+              <samples>1</samples>
+              <resolution>1</resolution>
+              <min_angle>0</min_angle>
+              <max_angle>0</max_angle>
+            </horizontal>
+            <vertical>
+              <samples>1</samples>
+              <resolution>1</resolution>
+              <min_angle>0</min_angle>
+              <max_angle>0</max_angle>
+            </vertical>
+          </scan>
+          <range>
+            <min>${min_range}</min>
+            <max>${max_range}</max>
+            <resolution>0.01</resolution>
+          </range>
+        </ray>
+        <always_on>1</always_on>
+        <visualize>false</visualize>
+      </sensor>
+    </link>
+  </xacro:macro>
+
+</robot>

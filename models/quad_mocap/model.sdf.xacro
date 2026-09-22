@@ -9,11 +9,15 @@
 
   <!-- Import the quadrotor base -->
   <xacro:include filename="$(find robotsix_px4_simulation)/models/common/quadrotor_base.xacro"/>
+  <xacro:include filename="$(find robotsix_px4_simulation)/models/common/rangefinder.xacro"/>
   
   <!-- Instantiate the quadrotor with MoCap -->
   <xacro:quadrotor_base name="quad_mocap">
 	  <additional_sensors>
 	  </additional_sensors>
+	  <additional_links>
+	    <xacro:downward_rangefinder/>
+	  </additional_links>
       <model_plugin>
  	   <plugin
         	name='ignition::gazebo::systems::OdometryPublisher'

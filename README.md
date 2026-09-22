@@ -10,7 +10,7 @@ processes.
 The `robotsix_px4_simulation` package provides the following capabilities:
 
 - **Action-Based Interface**: ROS2 action server interface for programmatic control of simulations
-- **Pre-Configured Models**: Ready-to-use quadcopter models with GPS or mocap sensors (defined in xacro format)
+- **Pre-Configured Models**: Ready-to-use quadcopter models with GPS or mocap sensors and a downward rangefinder (defined in xacro format)
 - **Process Management**: Proper handling of all simulation processes (Gazebo, PX4,
   MicroXRCE-DDS Agent)
 - **Flexible Deployment**: Docker support for easy deployment with pre-built PX4 and MicroXRCE-DDS Agent
@@ -141,6 +141,11 @@ The package includes pre-configured generic drone models (defined as xacro files
 
 - **quad_gps**: Quadcopter with GPS for outdoor use
 - **quad_mocap**: Quadcopter with mocap markers for indoor use
+
+Both quadcopters carry a downward-facing laser rangefinder (`models/common/rangefinder.xacro`). The
+PX4 gz bridge picks it up from the `lidar_sensor_link` link and the `lidar` sensor name, publishes it
+as a `distance_sensor` message and EKF2 fuses it into `vehicle_local_position.dist_bottom`, so a
+height above ground is available without assuming flat ground between takeoff and landing.
 
 The models and worlds provided in this package are automatically included in the `GZ_SIM_RESOURCE_PATH` when the
 package is sourced. To provide your own models or worlds, you can either:

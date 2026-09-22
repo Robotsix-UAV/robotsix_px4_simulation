@@ -9,6 +9,7 @@
   
   <!-- Import the quadrotor base -->
   <xacro:include filename="$(find robotsix_px4_simulation)/models/common/quadrotor_base.xacro"/>
+  <xacro:include filename="$(find robotsix_px4_simulation)/models/common/rangefinder.xacro"/>
   
   <!-- Instantiate the quadrotor with GPS -->
   <xacro:quadrotor_base name="quad_gps">
@@ -18,6 +19,9 @@
           <update_rate>30</update_rate>
         </sensor>
 </additional_sensors>
+<additional_links>
+  <xacro:downward_rangefinder/>
+</additional_links>
 <model_plugin>
 </model_plugin>
   </xacro:quadrotor_base>
